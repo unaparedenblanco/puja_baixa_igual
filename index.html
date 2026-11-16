@@ -1,0 +1,4407 @@
+<html lang="ca"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direcció del So - Puja la Muntanya! (Infantil)</title>
+  <!-- Llibreria de Confeti per a les Celebracions -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bubblegum Sans', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100dvh;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    /* BOTONS FLOTANTS SUPERIOR */
+    .btn-exit-game {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: #ef4444;
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #991b1b, 0 6px 15px rgba(0,0,0,0.5);
+      z-index: 95;
+      transition: transform 0.1s;
+    }
+    .btn-exit-game:active { transform: scale(0.95); }
+
+    .btn-config {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #38bdf8;
+      color: #0f172a;
+      border: 3px solid #fff;
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #0284c7, 0 6px 15px rgba(0,0,0,0.5);
+      z-index: 95;
+      transition: transform 0.1s;
+    }
+    .btn-config:active { transform: scale(0.95); }
+
+    /* PANTALLA D'INICI / SELECCIÓ D'IDIOMA */
+    .lang-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100dvh;
+      background: radial-gradient(circle, rgba(15,23,42,0.94) 0%, rgba(15,23,42,0.99) 100%);
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+      gap: clamp(14px, 2.5vh, 26px);
+      overflow: hidden;
+    }
+
+    .lang-title {
+      font-size: clamp(1.9rem, min(4.8vw, 5.5vh), 3.3rem);
+      color: #ffcc00;
+      text-shadow: 0 0 25px rgba(255,204,0,0.6), 4px 4px #000;
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1.15;
+    }
+
+    .lang-subtitle {
+      font-size: clamp(1rem, 2.1vw, 1.35rem);
+      color: #38bdf8;
+      text-shadow: 2px 2px #000;
+      font-weight: bold;
+    }
+
+    .lang-cards-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: clamp(14px, 2.5vw, 24px);
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .lang-card {
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border: 4px solid #38bdf8;
+      border-radius: 26px;
+      padding: clamp(18px, 2.8vh, 28px) 24px;
+      width: clamp(180px, 26vw, 230px);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 0 #0284c7, 0 15px 30px rgba(0,0,0,0.7);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .lang-card:hover {
+      transform: translateY(-6px) scale(1.04);
+      border-color: #ffcc00;
+      box-shadow: 0 8px 0 #ca8a04, 0 18px 35px rgba(255, 204, 0, 0.35);
+    }
+
+    .lang-card:active {
+      transform: scale(0.96);
+    }
+
+    .lang-flag-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.3rem;
+      background: rgba(56, 189, 248, 0.15);
+      border: 3px solid #ffcc00;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .lang-card-name {
+      font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+      color: #fff;
+      font-weight: 900;
+      text-shadow: 2px 2px #000;
+    }
+
+    .lang-card-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      font-weight: bold;
+    }
+
+    .btn-change-lang {
+      background: rgba(30, 41, 59, 0.85);
+      border: 2px solid #ffcc00;
+      color: #ffcc00;
+      font-size: 0.85rem;
+      font-weight: bold;
+      padding: 6px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+    .btn-change-lang:hover {
+      background: rgba(255, 204, 0, 0.18);
+    }
+
+    /* PANTALLA D'INICI / MENÚ PRINCIPAL */
+    .start-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100dvh;
+      background: radial-gradient(circle, rgba(15,23,42,0.92) 0%, rgba(15,23,42,0.98) 100%);
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(10px, 2vh, 20px) 20px;
+      text-align: center;
+      gap: clamp(8px, 1.5vh, 14px);
+      overflow: hidden;
+    }
+
+    .start-title {
+      font-size: clamp(1.8rem, min(4.8vw, 6vh), 3.4rem);
+      color: #ffcc00;
+      text-shadow: 0 0 25px rgba(255,204,0,0.6), 4px 4px #000;
+      font-weight: 900;
+      letter-spacing: 2px;
+      line-height: 1.1;
+    }
+
+    .start-subtitle {
+      font-size: clamp(0.95rem, min(2vw, 2.5vh), 1.25rem);
+      color: #38bdf8;
+      text-shadow: 2px 2px #000;
+      font-weight: bold;
+      max-width: 650px;
+      margin-bottom: 2px;
+    }
+
+    /* SEGUIMENT DELS 4 INSTRUMENTS AL CIM */
+    .gems-tracker-start {
+      background: rgba(30, 41, 59, 0.85);
+      border: 3px solid #ffcc00;
+      border-radius: 18px;
+      padding: clamp(8px, 1.4vh, 12px) 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(6px, 1vh, 8px);
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .gems-tracker-title {
+      font-size: 0.85rem;
+      color: #ffcc00;
+      font-weight: bold;
+    }
+
+    .gems-grid {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .gem-item {
+      background: #0f172a;
+      border: 2px solid #475569;
+      border-radius: 12px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.45;
+      filter: grayscale(0.8);
+      transition: all 0.3s;
+    }
+
+    .gem-item.unlocked {
+      opacity: 1;
+      filter: grayscale(0);
+      border-color: #22c55e;
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+      transform: scale(1.05);
+    }
+
+    .gem-icon {
+      width: clamp(36px, 5.2vh, 46px);
+      height: clamp(36px, 5.2vh, 46px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gem-icon svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+    }
+    .gem-item.unlocked .gem-icon svg {
+      animation: gemShimmer 2.4s ease-in-out infinite alternate;
+    }
+    @keyframes gemShimmer {
+      0% { filter: drop-shadow(0 0 6px rgba(255,255,255,0.5)); transform: scale(1); }
+      100% { filter: drop-shadow(0 0 16px rgba(255,204,0,0.95)); transform: scale(1.08); }
+    }
+    .gem-name { font-size: 0.7rem; color: #fff; font-weight: bold; margin-top: 3px; }
+
+    .btn-reset-gems {
+      background: transparent;
+      border: 1px dashed #94a3b8;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 2px;
+    }
+    .btn-reset-gems:hover { color: #fff; border-color: #fff; }
+
+    /* CONTENIDOR HORITZONTAL PER ALS BOTONS DE JOC EN ESCRIPTORI */
+    .start-buttons-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .btn-start-menu {
+      background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+      color: #fff;
+      border: 3px solid #fff;
+      border-radius: 50px;
+      padding: clamp(10px, 1.6vh, 14px) 28px;
+      font-size: clamp(1.05rem, min(2.2vw, 2.6vh), 1.4rem);
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #14532d, 0 10px 20px rgba(0,0,0,0.6);
+      transition: transform 0.15s, filter 0.15s;
+      font-family: inherit;
+    }
+    .btn-start-menu:hover { transform: scale(1.04); filter: brightness(1.1); }
+    .btn-start-menu:active { transform: scale(0.96); }
+
+    .btn-start-menu.btn-level2 {
+      background: linear-gradient(180deg, #f97316 0%, #c2410c 100%);
+      box-shadow: 0 6px 0 #9a3412, 0 10px 20px rgba(0,0,0,0.6);
+    }
+
+    .start-footer-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-start-config {
+      background: transparent;
+      border: 2px solid #38bdf8;
+      color: #38bdf8;
+      font-size: 0.85rem;
+      font-weight: bold;
+      padding: 6px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-start-config:hover { background: rgba(56, 189, 248, 0.15); }
+
+    /* PANTALLA SELECCIÓ D'INSTRUMENT I PERSONATGE */
+    .char-select-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.96);
+      z-index: 85;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .select-section-title {
+      font-size: clamp(1rem, 2.2vw, 1.3rem);
+      color: #ffcc00;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 1px 1px #000;
+    }
+
+    .gem-select-grid {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .gem-select-card {
+      background: #1e293b;
+      border: 3px solid #475569;
+      border-radius: 16px;
+      padding: 12px 18px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+      width: 135px;
+    }
+
+    .gem-select-card:hover {
+      transform: translateY(-4px);
+      border-color: #ffcc00;
+    }
+
+    .gem-select-card.selected {
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.2);
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+      transform: scale(1.05);
+    }
+
+    .gem-select-card.already-unlocked {
+      opacity: 0.65;
+    }
+
+    .char-cards-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .char-card {
+      background: #1e293b;
+      border: 4px solid #475569;
+      border-radius: 20px;
+      padding: 14px;
+      width: 140px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .char-card:hover { transform: scale(1.04); }
+    .char-card.selected {
+      border-color: #ffcc00;
+      background: rgba(255, 204, 0, 0.15);
+      box-shadow: 0 0 25px rgba(255, 204, 0, 0.4);
+    }
+
+    .char-card-avatar {
+      width: 75px;
+      height: 75px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .char-card-name {
+      font-size: 0.85rem;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    /* HUD / BARRA SUPERIOR DE PROGRÉS */
+    .hud {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      padding: 14px 16px;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .progress-hud-container {
+      background: rgba(15, 23, 42, 0.88);
+      border: 3px solid #ffcc00;
+      border-radius: 24px;
+      padding: 10px 20px;
+      width: 100%;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      pointer-events: auto;
+    }
+
+    .progress-bar-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hud-char-avatar {
+      width: 44px;
+      height: 44px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    .health-bar-container {
+      flex: 1;
+      height: 22px;
+      background: #334155;
+      border: 2px solid #fff;
+      border-radius: 50px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .health-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      border-radius: 50px;
+      transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .progress-text {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 1px 1px #000;
+    }
+
+    .hud-gem-target {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.9));
+      animation: pulseGemTarget 1.5s infinite alternate;
+    }
+    .hud-gem-target svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes pulseGemTarget {
+      from { transform: scale(1); }
+      to { transform: scale(1.15); }
+    }
+
+    .timer-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #ffcc00;
+      font-weight: bold;
+    }
+
+    .hud-gems-bar {
+      display: flex;
+      gap: 6px;
+    }
+
+    .hud-gem-slot {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 3px;
+      opacity: 0.35;
+      filter: grayscale(1);
+    }
+    .hud-gem-slot svg {
+      width: 100%;
+      height: 100%;
+    }
+    .hud-gem-slot.unlocked {
+      opacity: 1;
+      filter: grayscale(0);
+      border-color: #22c55e;
+      background: rgba(34, 197, 94, 0.2);
+    }
+    .hud-gem-slot.current-target {
+      opacity: 1;
+      filter: grayscale(0);
+      border-color: #ffcc00;
+      background: rgba(255, 204, 0, 0.25);
+      animation: bounceSlot 1s infinite alternate;
+    }
+
+    @keyframes bounceSlot {
+      from { transform: translateY(0); }
+      to { transform: translateY(-3px); }
+    }
+
+    /* ESCENARI DE LA MUNTANYA */
+    .stage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .mountain-container {
+      position: absolute;
+      bottom: 0; left: 0; width: 100%; height: 85%;
+    }
+
+    .mountain-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* FITES DEL CAMÍ SOBRE LA MUNTANYA */
+    .path-node {
+      position: absolute;
+      width: clamp(28px, 4.5vw, 42px);
+      height: clamp(28px, 4.5vw, 42px);
+      background: #1e293b;
+      border: 3px solid #64748b;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(0.65rem, 1vw, 0.8rem);
+      font-weight: bold;
+      color: #e2e8f0;
+      text-shadow: 1px 1px #000;
+    }
+
+    .path-node.reached {
+      background: #22c55e;
+      border-color: #fff;
+      color: #fff;
+      box-shadow: 0 0 12px #22c55e, 0 0 20px rgba(34, 197, 94, 0.6);
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .path-node.summit-node {
+      border-color: #ffcc00;
+      background: rgba(180, 83, 9, 0.95);
+    }
+
+    .path-node.summit-node.reached {
+      background: #eab308;
+      box-shadow: 0 0 16px #ffcc00;
+    }
+
+    .character-runner {
+      position: absolute;
+      width: clamp(64px, 8.5vw, 96px);
+      height: clamp(72px, 10dvh, 112px);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom center;
+      transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), top 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s ease;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.85));
+      z-index: 5;
+      transform: translate(-50%, -92%);
+    }
+
+    .character-runner.jump-walk {
+      animation: animJumpWalk 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    .character-runner.shake-red {
+      animation: animShakeRed 0.8s ease-in-out;
+    }
+
+    @keyframes animJumpWalk {
+      0% { transform: translate(-50%, -92%) translateY(0); }
+      50% { transform: translate(-50%, -92%) translateY(-34px) scale(1.12); }
+      100% { transform: translate(-50%, -92%) translateY(0); }
+    }
+
+    @keyframes animShakeRed {
+      0% { filter: brightness(1) drop-shadow(0 8px 12px rgba(0,0,0,0.85)); transform: translate(-50%, -92%); }
+      20% { filter: brightness(3) sepia(1) hue-rotate(-50deg); transform: translate(-65%, -92%) rotate(-8deg); }
+      40% { filter: brightness(4) sepia(1) hue-rotate(-50deg); transform: translate(-35%, -92%) rotate(8deg); }
+      60% { filter: brightness(3) sepia(1) hue-rotate(-50deg); transform: translate(-55%, -92%) rotate(-5deg); }
+      80% { filter: brightness(2) sepia(1); transform: translate(-45%, -92%); }
+      100% { filter: brightness(1) drop-shadow(0 8px 12px rgba(0,0,0,0.85)); transform: translate(-50%, -92%); }
+    }
+
+    .gem-destination {
+      position: absolute;
+      width: clamp(48px, 6.5vw, 72px);
+      height: clamp(48px, 6.5vw, 72px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+      animation: floatGem 2s infinite ease-in-out;
+      filter: drop-shadow(0 0 18px rgba(255, 204, 0, 0.95));
+      transition: all 0.5s ease;
+      transform: translate(-50%, -50%);
+    }
+    .gem-destination svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .gem-destination.gem-collect-glow {
+      animation: gemCollectGlow 1.2s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes floatGem {
+      0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+      50% { transform: translate(-50%, -50%) translateY(-10px); }
+    }
+
+    @keyframes gemCollectGlow {
+      0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 15px #ffcc00); }
+      50% { transform: translate(-50%, -50%) scale(1.8) rotate(15deg); filter: drop-shadow(0 0 40px #fff) drop-shadow(0 0 60px #ffcc00); }
+      100% { transform: translate(-50%, -50%) scale(1.4) rotate(0deg); filter: drop-shadow(0 0 30px #ffcc00); }
+    }
+
+    .floating-text {
+      position: absolute;
+      top: 20%;
+      font-size: clamp(1.3rem, 3vw, 2.2rem);
+      font-weight: bold;
+      text-shadow: 3px 3px 0 #000, -2px -2px 0 #000;
+      pointer-events: none;
+      z-index: 120;
+      animation: floatUp 1.8s ease-out forwards;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translateY(20px) scale(0.6); }
+      20% { opacity: 1; transform: translateY(-10px) scale(1.2); }
+      80% { opacity: 1; transform: translateY(-50px) scale(1); }
+      100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+    }
+
+    /* MODAL POP-UP PREGUNTA (PREGUNTA DALT + 3 RESPOSTES BAIX) */
+    .modal-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-quiz {
+      background: rgba(15, 23, 42, 0.96);
+      border: 5px solid #ffcc00;
+      border-radius: 26px;
+      width: 100%;
+      max-width: 720px;
+      padding: 22px 24px 26px 24px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.85), 0 0 25px rgba(255, 204, 0, 0.35);
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-height: 95vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* BLOC SUPERIOR DEL MODAL: TEMPORITZADOR + PREGUNTA + IMATGE + ÀUDIO */
+    .quiz-top-section {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .quiz-timer-bar-container {
+      width: 100%;
+      height: 16px;
+      background: #334155;
+      border: 2px solid #ffcc00;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .quiz-timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #22c55e, #eab308, #ef4444);
+      transition: width 0.1s linear;
+    }
+
+    .quiz-timer-text {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #fff;
+      text-shadow: 1px 1px #000;
+      font-weight: bold;
+    }
+
+    .question-header-badge {
+      background: rgba(56, 189, 248, 0.18);
+      border: 2px solid #38bdf8;
+      color: #38bdf8;
+      font-size: 0.85rem;
+      font-weight: 900;
+      padding: 4px 14px;
+      border-radius: 50px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .question-title {
+      font-size: clamp(1.35rem, 3.2vw, 1.9rem);
+      line-height: 1.3;
+      color: #fff;
+      text-align: center;
+      font-weight: 900;
+      text-shadow: 2px 2px #000;
+    }
+
+    .quiz-image-container {
+      width: 100%;
+      max-height: 130px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid #334155;
+    }
+
+    .quiz-image {
+      max-width: 100%;
+      max-height: 130px;
+      object-fit: contain;
+    }
+
+    .quiz-audio-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      background: rgba(30, 41, 59, 0.9);
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 3px solid #ffcc00;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-replay-audio {
+      background: #ffcc00;
+      color: #0f172a;
+      border: 3px solid #fff;
+      border-radius: 50px;
+      padding: 10px 26px;
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+      font-weight: 900;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 5px 0 #ca8a04;
+      transition: transform 0.15s;
+    }
+
+    .btn-replay-audio:hover {
+      transform: scale(1.05);
+      background: #fde047;
+    }
+
+    .btn-replay-audio:active {
+      transform: scale(0.96);
+    }
+
+    .audio-wave-indicator {
+      font-size: 0.95rem;
+      color: #38bdf8;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quiz-audio-player {
+      width: 100%;
+      max-width: 380px;
+      height: 36px;
+    }
+
+    /* BLOC INFERIOR DEL MODAL: 3 BOTONS DE RESPOSTA (PUJA, IGUAL, BAIXA) */
+    .quiz-answers-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 540px) {
+      .quiz-answers-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .direction-choice-btn {
+        flex-direction: row !important;
+        padding: 14px 20px !important;
+      }
+    }
+
+    .direction-choice-btn {
+      width: 100%;
+      padding: 18px 12px;
+      border-radius: 22px;
+      border: 4px solid #fff;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-weight: 900;
+      font-size: clamp(1.35rem, 3vw, 1.85rem);
+      letter-spacing: 1px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    }
+
+    .direction-choice-btn:hover {
+      transform: translateY(-4px) scale(1.03);
+      filter: brightness(1.08);
+    }
+
+    .direction-choice-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Colors diferenciats per a cada direcció */
+    .btn-puja {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      box-shadow: 0 8px 0 #0369a1, 0 12px 24px rgba(2, 132, 199, 0.45);
+    }
+
+    .btn-igual {
+      background: linear-gradient(180deg, #a855f7 0%, #7e22ce 100%);
+      box-shadow: 0 8px 0 #581c87, 0 12px 24px rgba(126, 34, 206, 0.45);
+    }
+
+    .btn-baixa {
+      background: linear-gradient(180deg, #f97316 0%, #c2410c 100%);
+      box-shadow: 0 8px 0 #9a3412, 0 12px 24px rgba(194, 65, 12, 0.45);
+    }
+
+    .direction-arrow-svg {
+      width: clamp(50px, 7.5vw, 68px);
+      height: clamp(50px, 7.5vw, 68px);
+      flex-shrink: 0;
+      filter: drop-shadow(0 3px 4px rgba(0,0,0,0.45));
+    }
+
+    .direction-choice-btn.correct-feedback {
+      background: linear-gradient(180deg, #22c55e 0%, #15803d 100%) !important;
+      box-shadow: 0 8px 0 #14532d, 0 0 25px #22c55e !important;
+      border-color: #fff !important;
+      animation: pulseGreen 0.5s infinite alternate;
+    }
+
+    .direction-choice-btn.wrong-feedback {
+      background: linear-gradient(180deg, #ef4444 0%, #991b1b 100%) !important;
+      box-shadow: 0 6px 0 #7f1d1d !important;
+      opacity: 0.6;
+    }
+
+    @keyframes pulseGreen {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+
+    .feedback-msg {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #fbbf24;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 8px 18px;
+      border-radius: 14px;
+      border: 2px solid #ef4444;
+      font-weight: bold;
+    }
+
+    /* PANTALLA DE RESULTATS FINALS */
+    .results-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 180;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .results-card {
+      background: #1e293b;
+      border: 4px solid #ffcc00;
+      border-radius: 20px;
+      padding: 25px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .results-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.3rem);
+      text-shadow: 3px 3px #000;
+      font-weight: bold;
+    }
+    .results-title.win { color: #22c55e; }
+    .results-title.lose { color: #ef4444; }
+
+    .gem-unlocked-banner {
+      background: rgba(255, 204, 0, 0.15);
+      border: 2px dashed #ffcc00;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 1rem;
+      color: #ffcc00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: bold;
+    }
+
+    .stats-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #0f172a;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: left;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* PANTALLA DE CELEBRACIÓ INDIVIDUAL D'UNA PEDRA */
+    .single-gem-celebration-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 55%, #020617 100%);
+      z-index: 280;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .single-gem-rays {
+      position: absolute;
+      width: 160vmax;
+      height: 160vmax;
+      background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 204, 0, 0.14) 0deg 10deg,
+        transparent 10deg 20deg
+      );
+      animation: spinRays 24s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes spinRays {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .single-gem-hero-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      height: clamp(240px, 42vh, 380px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(24px, 6vw, 70px);
+      margin: 12px 0 24px 0;
+      z-index: 5;
+    }
+
+    .single-gem-halo {
+      position: absolute;
+      width: min(85vw, 520px);
+      height: min(85vw, 520px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 204, 0, 0.65) 0%, rgba(56, 189, 248, 0.35) 45%, transparent 72%);
+      animation: spinHalo 5s linear infinite;
+      pointer-events: none;
+    }
+
+    .single-gem-char {
+      position: relative;
+      width: clamp(150px, 28vw, 260px);
+      height: clamp(170px, 32vh, 290px);
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center bottom;
+      filter: drop-shadow(0 12px 24px rgba(0,0,0,0.85)) drop-shadow(0 0 20px rgba(255,255,255,0.35));
+      animation: bounceChar 1s ease-in-out infinite alternate;
+      z-index: 6;
+    }
+
+    .single-gem-obj {
+      position: relative;
+      width: clamp(150px, 26vw, 240px);
+      height: clamp(150px, 26vw, 240px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 35px rgba(255, 204, 0, 0.95)) drop-shadow(0 0 60px rgba(255, 255, 255, 0.5));
+      animation: bounceGemBig 1.1s ease-in-out infinite alternate;
+      z-index: 6;
+    }
+
+    .single-gem-obj svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes bounceChar {
+      0% { transform: translateY(0) rotate(-5deg) scale(1); }
+      100% { transform: translateY(-22px) rotate(5deg) scale(1.06); }
+    }
+
+    @keyframes bounceGemBig {
+      0% { transform: translateY(0) scale(1) rotate(-4deg); }
+      100% { transform: translateY(-26px) scale(1.14) rotate(6deg); }
+    }
+
+    @keyframes spinHalo {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.12); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    /* PANTALLA DE CELEBRACIÓ DELS 4 PEDRES */
+    .grand-celebration-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, #312e81 0%, #09090b 100%);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .celebration-title {
+      font-size: clamp(1.8rem, 4.8vw, 3.4rem);
+      color: #ffcc00;
+      text-shadow: 0 0 20px #ffcc00, 4px 4px #e74c3c;
+      animation: pulseTitle 1.2s infinite alternate;
+      margin-bottom: 8px;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+
+    @keyframes pulseTitle {
+      0% { transform: scale(0.95); filter: drop-shadow(0 0 10px #ffcc00); }
+      100% { transform: scale(1.06); filter: drop-shadow(0 0 30px #38bdf8); }
+    }
+
+    .celebration-subtitle {
+      font-size: clamp(1rem, 2.4vw, 1.4rem);
+      color: #38bdf8;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px #000;
+      line-height: 1.4;
+      font-weight: bold;
+    }
+
+    .celebration-hero-wrapper {
+      position: relative;
+      width: clamp(240px, 42vw, 380px);
+      height: clamp(260px, 46vw, 420px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .celebration-halo {
+      position: absolute;
+      width: 110%;
+      height: 110%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 204, 0, 0.75) 0%, rgba(56, 189, 248, 0.4) 45%, transparent 75%);
+      animation: spinHalo 6s linear infinite;
+    }
+
+    .celebration-character {
+      position: relative;
+      width: 90%;
+      height: 90%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center bottom;
+      filter: drop-shadow(0 0 30px rgba(255, 204, 0, 0.95)) drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
+      animation: danceFestive 1.1s ease-in-out infinite alternate;
+      z-index: 5;
+    }
+
+    @keyframes danceFestive {
+      0% { transform: translateY(0) rotate(-8deg) scale(1.05); }
+      25% { transform: translateY(-35px) rotate(0deg) scale(1.18); }
+      50% { transform: translateY(0) rotate(8deg) scale(1.05); }
+      75% { transform: translateY(-25px) rotate(-4deg) scale(1.15); }
+      100% { transform: translateY(0) rotate(6deg) scale(1.08); }
+    }
+
+    .festive-decorations {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .festive-decorations span {
+      position: absolute;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      animation: floatFestive 2.5s ease-in-out infinite alternate;
+    }
+
+    .festive-decorations span:nth-child(1) { top: 10%; left: 8%; animation-delay: 0s; }
+    .festive-decorations span:nth-child(2) { top: 12%; right: 10%; animation-delay: 0.4s; }
+    .festive-decorations span:nth-child(3) { bottom: 22%; left: 10%; animation-delay: 0.8s; }
+    .festive-decorations span:nth-child(4) { bottom: 20%; right: 8%; animation-delay: 1.2s; }
+    .festive-decorations span:nth-child(5) { top: 38%; left: 4%; animation-delay: 0.6s; }
+    .festive-decorations span:nth-child(6) { top: 36%; right: 4%; animation-delay: 1s; }
+
+    @keyframes floatFestive {
+      0% { transform: translateY(0) rotate(-18deg) scale(0.9); }
+      100% { transform: translateY(-28px) rotate(18deg) scale(1.25); }
+    }
+
+    .celebration-animals-bar {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 12px 28px;
+      border-radius: 30px;
+      border: 3px solid #ffcc00;
+      box-shadow: 0 0 25px rgba(255, 204, 0, 0.5);
+    }
+
+    .celebration-gem-badge {
+      width: clamp(46px, 6vw, 68px);
+      height: clamp(46px, 6vw, 68px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.75));
+      animation: bounceGem 0.9s ease-in-out infinite alternate;
+    }
+
+    .celebration-gem-badge svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .celebration-gem-badge:nth-child(1) { animation-delay: 0s; }
+    .celebration-gem-badge:nth-child(2) { animation-delay: 0.2s; }
+    .celebration-gem-badge:nth-child(3) { animation-delay: 0.4s; }
+    .celebration-gem-badge:nth-child(4) { animation-delay: 0.6s; }
+
+    @keyframes bounceGem {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-16px); }
+    }
+
+    /* PANELL DE CONFIGURACIÓ */
+    .config-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.92);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-y: auto;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .config-container {
+      width: 100%;
+      max-width: 750px;
+      background: #1e293b;
+      border: 3px solid #ffcc00;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
+    }
+
+    .config-tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: #ffcc00;
+      color: #000;
+      border-color: #ffcc00;
+    }
+
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .tab-content.active { display: flex; }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      color: #ffcc00;
+      font-weight: bold;
+    }
+
+    .form-control {
+      padding: 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #fff;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn-action {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95rem;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+    .btn-action:hover { background: #16a34a; }
+
+    .btn-close {
+      background: #ef4444;
+      margin-top: 10px;
+    }
+    .btn-close:hover { background: #dc2626; }
+
+    .q-item {
+      background: #0f172a;
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .q-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      word-break: break-word;
+    }
+
+    .q-item-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .q-item button {
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .btn-edit-q {
+      background: #0284c7;
+    }
+    .btn-edit-q:hover {
+      background: #0369a1;
+    }
+
+    .btn-delete-q {
+      background: #ef4444;
+    }
+    .btn-delete-q:hover {
+      background: #dc2626;
+    }
+
+    /* MODAL ACCÉS CONFIGURACIÓ (PIN 4 XIFRES) */
+    .pin-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 250;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .pin-card {
+      background: #1e293b;
+      border: 3px solid #ffcc00;
+      border-radius: 12px;
+      padding: 24px;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    }
+
+    .pin-input {
+      letter-spacing: 12px;
+      font-size: 1.8rem;
+      text-align: center;
+      width: 180px;
+      padding: 8px;
+    }
+
+    /* DIÀLEG DE CONFIRMACIÓ PERSONALITZAT (SENSE confirm() NATIVE) */
+    .confirm-modal {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.88);
+      z-index: 280;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container" style="background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&amp;fit=crop&amp;w=1200&amp;q=80');">
+    <button class="btn-exit-game" id="btn-exit-game" onclick="exitToStartScreen()" style="display: block;">❌ SORTIR</button>
+    <button class="btn-config" id="btn-main-config" onclick="checkPinAndOpenConfig()" style="display: block;">⚙️ CONFIG</button>
+
+    <!-- PANTALLA D'INICI 0: SELECCIÓ D'IDIOMA -->
+    <div class="lang-screen" id="lang-screen" style="display: none;">
+      <div class="lang-title">🎵 DIRECCIÓ DEL SO · DIRECCIÓN DEL SONIDO · SOUND DIRECTION</div>
+      <div class="lang-subtitle">Tria l'idioma · Elige el idioma · Choose your language</div>
+
+      <div class="lang-cards-grid">
+        <div class="lang-card" onclick="selectLanguage('va')">
+          <div class="lang-flag-badge">🍊</div>
+          <div class="lang-card-name">Valencià</div>
+          <div class="lang-card-desc">Jugar en valencià</div>
+        </div>
+
+        <div class="lang-card" onclick="selectLanguage('es')">
+          <div class="lang-flag-badge">🌞</div>
+          <div class="lang-card-name">Castellano</div>
+          <div class="lang-card-desc">Jugar en castellano</div>
+        </div>
+
+        <div class="lang-card" onclick="selectLanguage('en')">
+          <div class="lang-flag-badge">🌍</div>
+          <div class="lang-card-name">English</div>
+          <div class="lang-card-desc">Play in English</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE PRESENTACIÓ / INICI -->
+    <div class="start-screen" id="start-screen" style="display: flex;">
+      <div class="start-title" id="ui-start-title">DIRECCIÓ DEL SO</div>
+      <div class="start-subtitle">Miguel Castellá</div>
+
+      <!-- SEGUIMENT DE LES 4 PEDRES PRECIOSES AL CIM -->
+      <div class="gems-tracker-start">
+        <div class="gems-tracker-title" id="ui-gems-tracker-title">💎 LES 4 PEDRES PRECIOSES AL CIM:</div>
+        <div class="gems-grid" id="gems-tracker-grid"><div class="gem-item ">
+          <div class="gem-icon"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="fireAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="fireCore" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#ea580c"></stop>
+              <stop offset="55%" stop-color="#facc15"></stop>
+              <stop offset="100%" stop-color="#ffffff"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#fireAura)"></circle>
+          <path d="M50 6 C62 24 80 34 78 60 C76 80 62 92 50 94 C38 92 24 80 22 60 C20 34 38 24 50 6 Z" fill="#9f1239" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"></path>
+          <polygon points="50,10 73,42 50,52" fill="#fb7185"></polygon>
+          <polygon points="50,10 27,42 50,52" fill="#f97316"></polygon>
+          <polygon points="27,42 50,52 28,74" fill="#be123c"></polygon>
+          <polygon points="73,42 72,74 50,52" fill="#e11d48"></polygon>
+          <polygon points="28,74 50,52 50,91" fill="#881337"></polygon>
+          <polygon points="72,74 50,91 50,52" fill="#4c0519"></polygon>
+          <polygon points="50,24 63,50 50,76 37,50" fill="url(#fireCore)" stroke="#fef08a" stroke-width="1.5"></polygon>
+          <polygon points="48,28 54,48 43,46" fill="#ffffff" opacity="0.9"></polygon>
+          <circle cx="22" cy="28" r="3" fill="#fde047"></circle>
+          <circle cx="80" cy="24" r="2.5" fill="#fb923c"></circle>
+          <circle cx="77" cy="14" r="1.8" fill="#ffffff"></circle>
+        </svg></div>
+          <div class="gem-name">Pedra de Foc</div>
+        </div><div class="gem-item ">
+          <div class="gem-icon"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="waterAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="waterGem" x1="15%" y1="0%" x2="85%" y2="100%">
+              <stop offset="0%" stop-color="#e0f2fe"></stop>
+              <stop offset="35%" stop-color="#38bdf8"></stop>
+              <stop offset="75%" stop-color="#0284c7"></stop>
+              <stop offset="100%" stop-color="#1e3a8a"></stop>
+            </linearGradient>
+            <linearGradient id="waterInner" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="50%" stop-color="#67e8f9"></stop>
+              <stop offset="100%" stop-color="#0369a1"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#waterAura)"></circle>
+          <polygon points="50,8 78,48 70,82 50,93 30,82 22,48" fill="url(#waterGem)" stroke="#bae6fd" stroke-width="2.5" stroke-linejoin="round"></polygon>
+          <polygon points="50,8 78,48 61,52" fill="#7dd3fc" opacity="0.8"></polygon>
+          <polygon points="50,8 22,48 39,52" fill="#e0f2fe" opacity="0.85"></polygon>
+          <polygon points="22,48 39,52 30,82" fill="#0284c7" opacity="0.75"></polygon>
+          <polygon points="78,48 70,82 61,52" fill="#0369a1" opacity="0.85"></polygon>
+          <polygon points="30,82 50,74 50,93" fill="#1e40af"></polygon>
+          <polygon points="70,82 50,93 50,74" fill="#172554"></polygon>
+          <polygon points="50,26 62,52 50,74 38,52" fill="url(#waterInner)" stroke="#ecfeff" stroke-width="1.3"></polygon>
+          <path d="M36 60 Q50 68 64 60" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" opacity="0.9"></path>
+          <polygon points="48,29 55,47 43,46" fill="#ffffff" opacity="0.95"></polygon>
+          <circle cx="20" cy="34" r="3" fill="#a5f3fc"></circle>
+          <circle cx="81" cy="38" r="2.5" fill="#67e8f9"></circle>
+          <circle cx="26" cy="21" r="2" fill="#ffffff"></circle>
+        </svg></div>
+          <div class="gem-name">Pedra d'Aigua</div>
+        </div><div class="gem-item ">
+          <div class="gem-icon"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="earthAura" cx="50%" cy="50%" r="48%">
+              <stop offset="0%" stop-color="#4ade80" stop-opacity="0.65"></stop>
+              <stop offset="100%" stop-color="#14532d" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="earthGem" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac"></stop>
+              <stop offset="45%" stop-color="#16a34a"></stop>
+              <stop offset="100%" stop-color="#14532d"></stop>
+            </linearGradient>
+            <linearGradient id="earthTable" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#dcfce7"></stop>
+              <stop offset="55%" stop-color="#22c55e"></stop>
+              <stop offset="100%" stop-color="#15803d"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#earthAura)"></circle>
+          <polygon points="50,8 85,29 85,71 50,92 15,71 15,29" fill="url(#earthGem)" stroke="#fde047" stroke-width="3" stroke-linejoin="round"></polygon>
+          <polygon points="50,8 85,29 67,39 50,28" fill="#bbf7d0" opacity="0.7"></polygon>
+          <polygon points="50,8 15,29 33,39 50,28" fill="#4ade80" opacity="0.8"></polygon>
+          <polygon points="15,29 33,39 33,61 15,71" fill="#15803d" opacity="0.85"></polygon>
+          <polygon points="85,29 85,71 67,61 67,39" fill="#166534" opacity="0.9"></polygon>
+          <polygon points="15,71 33,61 50,72 50,92" fill="#14532d"></polygon>
+          <polygon points="85,71 50,92 50,72 67,61" fill="#052e16"></polygon>
+          <polygon points="50,28 67,39 67,61 50,72 33,61 33,39" fill="url(#earthTable)" stroke="#fef08a" stroke-width="1.6"></polygon>
+          <path d="M50 34 L50 66 M50 45 L60 39 M50 54 L40 48" stroke="#fef08a" stroke-width="2.4" stroke-linecap="round"></path>
+          <polygon points="38,34 49,34 42,43" fill="#ffffff" opacity="0.85"></polygon>
+          <circle cx="17" cy="20" r="2.5" fill="#fde047"></circle>
+          <circle cx="83" cy="80" r="2.5" fill="#fde047"></circle>
+        </svg></div>
+          <div class="gem-name">Pedra de Terra</div>
+        </div><div class="gem-item ">
+          <div class="gem-icon"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="airAura" cx="50%" cy="50%" r="48%">
+              <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.8"></stop>
+              <stop offset="55%" stop-color="#c084fc" stop-opacity="0.35"></stop>
+              <stop offset="100%" stop-color="#6b21a8" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="airGem" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="45%" stop-color="#bae6fd"></stop>
+              <stop offset="80%" stop-color="#d8b4fe"></stop>
+              <stop offset="100%" stop-color="#9333ea"></stop>
+            </linearGradient>
+            <linearGradient id="airCore" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="60%" stop-color="#f0f9ff"></stop>
+              <stop offset="100%" stop-color="#e9d5ff"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#airAura)"></circle>
+          <path d="M12 36 Q26 24 38 33" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"></path>
+          <path d="M62 67 Q74 76 88 64" fill="none" stroke="#f3e8ff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"></path>
+          <polygon points="50,6 84,50 50,94 16,50" fill="url(#airGem)" stroke="#ffffff" stroke-width="2.8" stroke-linejoin="round"></polygon>
+          <polygon points="50,6 84,50 64,50" fill="#e0f2fe" opacity="0.85"></polygon>
+          <polygon points="50,6 16,50 36,50" fill="#ffffff" opacity="0.95"></polygon>
+          <polygon points="16,50 36,50 50,94" fill="#93c5fd" opacity="0.75"></polygon>
+          <polygon points="84,50 50,94 64,50" fill="#a855f7" opacity="0.65"></polygon>
+          <polygon points="50,24 64,50 50,76 36,50" fill="url(#airCore)" stroke="#ffffff" stroke-width="1.4"></polygon>
+          <polygon points="50,29 53,47 63,50 53,53 50,71 47,53 37,50 47,47" fill="#ffffff"></polygon>
+          <circle cx="76" cy="22" r="2.8" fill="#ffffff"></circle>
+          <circle cx="24" cy="78" r="2.5" fill="#f3e8ff"></circle>
+        </svg></div>
+          <div class="gem-name">Pedra d'Aire</div>
+        </div></div>
+        <button class="btn-reset-gems" id="ui-btn-reset-gems" onclick="askResetGemsProgress()">🔄 Reiniciar Pedres Precioses</button>
+      </div>
+
+      <div class="start-buttons-row">
+        <button class="btn-start-menu" id="ui-btn-play-notimer" onclick="openCharSelect(false)">🎵 Jugar (sense temps)</button>
+        <button class="btn-start-menu btn-level2" id="ui-btn-play-timer" onclick="openCharSelect(true)">⏱️ Jugar (amb temps)</button>
+      </div>
+
+      <div class="start-footer-actions">
+        <button class="btn-start-config" id="ui-btn-start-config" onclick="openConfigFromStart()">⚙️ CONFIGURACIÓ</button>
+        <button class="btn-change-lang" id="ui-btn-change-lang" onclick="openLanguageScreen()">🌐 IDIOMA (VALENCIÀ)</button>
+      </div>
+    </div>
+
+    <!-- DIÀLEG DE CONFIRMACIÓ PER REINICIAR PEDRES PRECIOSES -->
+    <div class="confirm-modal" id="reset-confirm-modal" style="display: none;">
+      <div class="pin-card">
+        <h3 style="color: #ffcc00; font-size: 1.1rem;" id="ui-reset-title">🔄 REINICIAR PEDRES PRECIOSES</h3>
+        <p style="font-size: 0.9rem; color: #e2e8f0; line-height: 1.4;" id="ui-reset-desc">Vols reiniciar el progrés de les 4 pedres precioses aconseguides?</p>
+        <div style="display: flex; gap: 10px; width: 100%; margin-top: 6px;">
+          <button class="btn-action" style="flex: 1;" id="ui-btn-confirm-reset" onclick="confirmResetGemsProgress()">SÍ, REINICIAR</button>
+          <button class="btn-action btn-close" style="flex: 1; margin-top: 0;" id="ui-btn-cancel-reset" onclick="closeResetConfirmModal()">CANCEL·LAR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA SELECCIÓ DE PEDRA PRECIOSA I PERSONATGE -->
+    <div class="char-select-screen" id="char-select-screen" style="display: none;">
+      <div class="select-section-title" id="ui-select-gem-title">1. TRIA LA PEDRA PRECIOSA QUE VOLS ACONSEGUIR</div>
+      <div class="gem-select-grid" id="gem-select-container"></div>
+
+      <div class="select-section-title" id="ui-select-char-title">2. TRIA EL TEU PERSONATGE</div>
+      <div class="char-cards-container">
+        <div class="char-card selected" id="card-p1a" onclick="selectFighter(1)">
+          <div class="char-card-avatar" id="select-avatar-p1a"></div>
+          <div class="char-card-name" id="select-name-p1a">Jessie</div>
+        </div>
+        <div class="char-card" id="card-p1b" onclick="selectFighter(2)">
+          <div class="char-card-avatar" id="select-avatar-p1b"></div>
+          <div class="char-card-name" id="select-name-p1b">Woody</div>
+        </div>
+      </div>
+
+      <button class="btn-start-menu" style="margin-top: 8px;" id="ui-btn-start-confirm" onclick="confirmSelectionAndStart()">🚀 COMENÇAR!</button>
+    </div>
+
+    <!-- HUD BARRA DE PROGRÉS (CAMÍ) -->
+    <div class="hud">
+      <div class="progress-hud-container">
+        <div class="progress-bar-wrapper">
+          <div class="hud-char-avatar" id="hud-avatar" style="background-image: url(&quot;https://static.wixstatic.com/media/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png/v1/fill/w_196,h_264,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png&quot;);"></div>
+          <div class="health-bar-container">
+            <div class="health-bar" id="progress-bar" style="width: 0%;"></div>
+            <div class="progress-text" id="progress-text">PAS 0 / 10</div>
+          </div>
+          <div class="hud-gem-target" id="hud-gem-target"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="fireAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="fireCore" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#ea580c"></stop>
+              <stop offset="55%" stop-color="#facc15"></stop>
+              <stop offset="100%" stop-color="#ffffff"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#fireAura)"></circle>
+          <path d="M50 6 C62 24 80 34 78 60 C76 80 62 92 50 94 C38 92 24 80 22 60 C20 34 38 24 50 6 Z" fill="#9f1239" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"></path>
+          <polygon points="50,10 73,42 50,52" fill="#fb7185"></polygon>
+          <polygon points="50,10 27,42 50,52" fill="#f97316"></polygon>
+          <polygon points="27,42 50,52 28,74" fill="#be123c"></polygon>
+          <polygon points="73,42 72,74 50,52" fill="#e11d48"></polygon>
+          <polygon points="28,74 50,52 50,91" fill="#881337"></polygon>
+          <polygon points="72,74 50,91 50,52" fill="#4c0519"></polygon>
+          <polygon points="50,24 63,50 50,76 37,50" fill="url(#fireCore)" stroke="#fef08a" stroke-width="1.5"></polygon>
+          <polygon points="48,28 54,48 43,46" fill="#ffffff" opacity="0.9"></polygon>
+          <circle cx="22" cy="28" r="3" fill="#fde047"></circle>
+          <circle cx="80" cy="24" r="2.5" fill="#fb923c"></circle>
+          <circle cx="77" cy="14" r="1.8" fill="#ffffff"></circle>
+        </svg></div>
+        </div>
+
+        <div class="timer-container">
+          <div class="hud-gems-bar" id="hud-gems-bar"><div class="hud-gem-slot" title="Pedra de Foc: Pendent"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="fireAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="fireCore" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#ea580c"></stop>
+              <stop offset="55%" stop-color="#facc15"></stop>
+              <stop offset="100%" stop-color="#ffffff"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#fireAura)"></circle>
+          <path d="M50 6 C62 24 80 34 78 60 C76 80 62 92 50 94 C38 92 24 80 22 60 C20 34 38 24 50 6 Z" fill="#9f1239" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"></path>
+          <polygon points="50,10 73,42 50,52" fill="#fb7185"></polygon>
+          <polygon points="50,10 27,42 50,52" fill="#f97316"></polygon>
+          <polygon points="27,42 50,52 28,74" fill="#be123c"></polygon>
+          <polygon points="73,42 72,74 50,52" fill="#e11d48"></polygon>
+          <polygon points="28,74 50,52 50,91" fill="#881337"></polygon>
+          <polygon points="72,74 50,91 50,52" fill="#4c0519"></polygon>
+          <polygon points="50,24 63,50 50,76 37,50" fill="url(#fireCore)" stroke="#fef08a" stroke-width="1.5"></polygon>
+          <polygon points="48,28 54,48 43,46" fill="#ffffff" opacity="0.9"></polygon>
+          <circle cx="22" cy="28" r="3" fill="#fde047"></circle>
+          <circle cx="80" cy="24" r="2.5" fill="#fb923c"></circle>
+          <circle cx="77" cy="14" r="1.8" fill="#ffffff"></circle>
+        </svg></div><div class="hud-gem-slot" title="Pedra d'Aigua: Pendent"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="waterAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="waterGem" x1="15%" y1="0%" x2="85%" y2="100%">
+              <stop offset="0%" stop-color="#e0f2fe"></stop>
+              <stop offset="35%" stop-color="#38bdf8"></stop>
+              <stop offset="75%" stop-color="#0284c7"></stop>
+              <stop offset="100%" stop-color="#1e3a8a"></stop>
+            </linearGradient>
+            <linearGradient id="waterInner" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="50%" stop-color="#67e8f9"></stop>
+              <stop offset="100%" stop-color="#0369a1"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#waterAura)"></circle>
+          <polygon points="50,8 78,48 70,82 50,93 30,82 22,48" fill="url(#waterGem)" stroke="#bae6fd" stroke-width="2.5" stroke-linejoin="round"></polygon>
+          <polygon points="50,8 78,48 61,52" fill="#7dd3fc" opacity="0.8"></polygon>
+          <polygon points="50,8 22,48 39,52" fill="#e0f2fe" opacity="0.85"></polygon>
+          <polygon points="22,48 39,52 30,82" fill="#0284c7" opacity="0.75"></polygon>
+          <polygon points="78,48 70,82 61,52" fill="#0369a1" opacity="0.85"></polygon>
+          <polygon points="30,82 50,74 50,93" fill="#1e40af"></polygon>
+          <polygon points="70,82 50,93 50,74" fill="#172554"></polygon>
+          <polygon points="50,26 62,52 50,74 38,52" fill="url(#waterInner)" stroke="#ecfeff" stroke-width="1.3"></polygon>
+          <path d="M36 60 Q50 68 64 60" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" opacity="0.9"></path>
+          <polygon points="48,29 55,47 43,46" fill="#ffffff" opacity="0.95"></polygon>
+          <circle cx="20" cy="34" r="3" fill="#a5f3fc"></circle>
+          <circle cx="81" cy="38" r="2.5" fill="#67e8f9"></circle>
+          <circle cx="26" cy="21" r="2" fill="#ffffff"></circle>
+        </svg></div><div class="hud-gem-slot" title="Pedra de Terra: Pendent"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="earthAura" cx="50%" cy="50%" r="48%">
+              <stop offset="0%" stop-color="#4ade80" stop-opacity="0.65"></stop>
+              <stop offset="100%" stop-color="#14532d" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="earthGem" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac"></stop>
+              <stop offset="45%" stop-color="#16a34a"></stop>
+              <stop offset="100%" stop-color="#14532d"></stop>
+            </linearGradient>
+            <linearGradient id="earthTable" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#dcfce7"></stop>
+              <stop offset="55%" stop-color="#22c55e"></stop>
+              <stop offset="100%" stop-color="#15803d"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#earthAura)"></circle>
+          <polygon points="50,8 85,29 85,71 50,92 15,71 15,29" fill="url(#earthGem)" stroke="#fde047" stroke-width="3" stroke-linejoin="round"></polygon>
+          <polygon points="50,8 85,29 67,39 50,28" fill="#bbf7d0" opacity="0.7"></polygon>
+          <polygon points="50,8 15,29 33,39 50,28" fill="#4ade80" opacity="0.8"></polygon>
+          <polygon points="15,29 33,39 33,61 15,71" fill="#15803d" opacity="0.85"></polygon>
+          <polygon points="85,29 85,71 67,61 67,39" fill="#166534" opacity="0.9"></polygon>
+          <polygon points="15,71 33,61 50,72 50,92" fill="#14532d"></polygon>
+          <polygon points="85,71 50,92 50,72 67,61" fill="#052e16"></polygon>
+          <polygon points="50,28 67,39 67,61 50,72 33,61 33,39" fill="url(#earthTable)" stroke="#fef08a" stroke-width="1.6"></polygon>
+          <path d="M50 34 L50 66 M50 45 L60 39 M50 54 L40 48" stroke="#fef08a" stroke-width="2.4" stroke-linecap="round"></path>
+          <polygon points="38,34 49,34 42,43" fill="#ffffff" opacity="0.85"></polygon>
+          <circle cx="17" cy="20" r="2.5" fill="#fde047"></circle>
+          <circle cx="83" cy="80" r="2.5" fill="#fde047"></circle>
+        </svg></div><div class="hud-gem-slot" title="Pedra d'Aire: Pendent"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="airAura" cx="50%" cy="50%" r="48%">
+              <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.8"></stop>
+              <stop offset="55%" stop-color="#c084fc" stop-opacity="0.35"></stop>
+              <stop offset="100%" stop-color="#6b21a8" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="airGem" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="45%" stop-color="#bae6fd"></stop>
+              <stop offset="80%" stop-color="#d8b4fe"></stop>
+              <stop offset="100%" stop-color="#9333ea"></stop>
+            </linearGradient>
+            <linearGradient id="airCore" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="60%" stop-color="#f0f9ff"></stop>
+              <stop offset="100%" stop-color="#e9d5ff"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#airAura)"></circle>
+          <path d="M12 36 Q26 24 38 33" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"></path>
+          <path d="M62 67 Q74 76 88 64" fill="none" stroke="#f3e8ff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"></path>
+          <polygon points="50,6 84,50 50,94 16,50" fill="url(#airGem)" stroke="#ffffff" stroke-width="2.8" stroke-linejoin="round"></polygon>
+          <polygon points="50,6 84,50 64,50" fill="#e0f2fe" opacity="0.85"></polygon>
+          <polygon points="50,6 16,50 36,50" fill="#ffffff" opacity="0.95"></polygon>
+          <polygon points="16,50 36,50 50,94" fill="#93c5fd" opacity="0.75"></polygon>
+          <polygon points="84,50 50,94 64,50" fill="#a855f7" opacity="0.65"></polygon>
+          <polygon points="50,24 64,50 50,76 36,50" fill="url(#airCore)" stroke="#ffffff" stroke-width="1.4"></polygon>
+          <polygon points="50,29 53,47 63,50 53,53 50,71 47,53 37,50 47,47" fill="#ffffff"></polygon>
+          <circle cx="76" cy="22" r="2.8" fill="#ffffff"></circle>
+          <circle cx="24" cy="78" r="2.5" fill="#f3e8ff"></circle>
+        </svg></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESCENARI DE LA MUNTANYA -->
+    <div class="stage" id="stage-area">
+      <div class="mountain-container" id="mountain-container">
+        <svg class="mountain-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="mtnMainGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#64748b"></stop>
+              <stop offset="45%" stop-color="#475569"></stop>
+              <stop offset="85%" stop-color="#334155"></stop>
+              <stop offset="100%" stop-color="#1e293b"></stop>
+            </linearGradient>
+            <linearGradient id="mtnShadowGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1e293b" stop-opacity="0.65"></stop>
+              <stop offset="100%" stop-color="#0f172a" stop-opacity="0.88"></stop>
+            </linearGradient>
+            <linearGradient id="snowGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff"></stop>
+              <stop offset="100%" stop-color="#cbd5e1"></stop>
+            </linearGradient>
+            <linearGradient id="meadowGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#22c55e"></stop>
+              <stop offset="100%" stop-color="#15803d"></stop>
+            </linearGradient>
+          </defs>
+
+          <!-- Núvols decoratius -->
+          <g class="mountain-cloud" opacity="0.8">
+            <ellipse cx="180" cy="110" rx="45" ry="18" fill="#f8fafc"></ellipse>
+            <ellipse cx="215" cy="105" rx="35" ry="20" fill="#f8fafc"></ellipse>
+            <ellipse cx="145" cy="112" rx="30" ry="15" fill="#f8fafc"></ellipse>
+          </g>
+          <g class="mountain-cloud cloud-2" opacity="0.7">
+            <ellipse cx="830" cy="130" rx="50" ry="18" fill="#f8fafc"></ellipse>
+            <ellipse cx="865" cy="124" rx="34" ry="20" fill="#f8fafc"></ellipse>
+            <ellipse cx="795" cy="133" rx="28" ry="14" fill="#f8fafc"></ellipse>
+          </g>
+
+          <!-- Muntanyes llunyanes de fons -->
+          <polygon points="0,565 210,275 430,565" fill="#1e293b" opacity="0.85"></polygon>
+          <polygon points="560,565 810,255 1000,565" fill="#1e293b" opacity="0.85"></polygon>
+
+          <!-- Muntanya principal -->
+          <polygon points="10,565 650,90 990,565" fill="url(#mtnMainGrad)" stroke="#0f172a" stroke-width="4" stroke-linejoin="round"></polygon>
+          <polygon points="650,90 790,565 990,565" fill="url(#mtnShadowGrad)"></polygon>
+
+          <!-- Cim nevat -->
+          <polygon points="650,90 547,232 588,215 620,245 650,218 682,248 712,216 749,228" fill="url(#snowGrad)"></polygon>
+
+          <!-- Prat base -->
+          <rect x="0" y="555" width="1000" height="45" rx="14" fill="url(#meadowGrad)" stroke="#14532d" stroke-width="3"></rect>
+
+          <!-- Pins a la falda de la muntanya -->
+          <g transform="translate(80, 525)">
+            <polygon points="15,0 0,32 30,32" fill="#166534"></polygon>
+            <polygon points="15,-14 3,14 27,14" fill="#15803d"></polygon>
+          </g>
+          <g transform="translate(120, 532)">
+            <polygon points="12,0 0,26 24,26" fill="#14532d"></polygon>
+            <polygon points="12,-11 2,11 22,11" fill="#166534"></polygon>
+          </g>
+          <g transform="translate(870, 526)">
+            <polygon points="15,0 0,32 30,32" fill="#166534"></polygon>
+            <polygon points="15,-14 3,14 27,14" fill="#15803d"></polygon>
+          </g>
+
+          <!-- Sender en ziga-zaga -->
+          <polyline points="160,545 340,495 520,445 350,395 440,345 620,295 490,250 560,205 680,165 620,130 650,90" fill="none" stroke="#78350f" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"></polyline>
+          <polyline id="mountain-trail-line" points="160,545 340,495 520,445 350,395 440,345 620,295 490,250 560,205 680,165 620,130 650,90" fill="none" stroke="#fbbf24" stroke-width="6" stroke-dasharray="12 10" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        </svg>
+
+        <!-- Fites de pas i personatge escalador -->
+        <div class="character-runner" id="char-p1" style="background-image: url(&quot;https://static.wixstatic.com/media/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png/v1/fill/w_196,h_264,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png&quot;); left: 16%; top: 90.8%;"></div>
+        <div class="gem-destination" id="stage-gem-target" style="left: 65%; top: 7.5%;"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="fireAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.7"></stop>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="fireCore" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#ea580c"></stop>
+              <stop offset="55%" stop-color="#facc15"></stop>
+              <stop offset="100%" stop-color="#ffffff"></stop>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#fireAura)"></circle>
+          <path d="M50 6 C62 24 80 34 78 60 C76 80 62 92 50 94 C38 92 24 80 22 60 C20 34 38 24 50 6 Z" fill="#9f1239" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"></path>
+          <polygon points="50,10 73,42 50,52" fill="#fb7185"></polygon>
+          <polygon points="50,10 27,42 50,52" fill="#f97316"></polygon>
+          <polygon points="27,42 50,52 28,74" fill="#be123c"></polygon>
+          <polygon points="73,42 72,74 50,52" fill="#e11d48"></polygon>
+          <polygon points="28,74 50,52 50,91" fill="#881337"></polygon>
+          <polygon points="72,74 50,91 50,52" fill="#4c0519"></polygon>
+          <polygon points="50,24 63,50 50,76 37,50" fill="url(#fireCore)" stroke="#fef08a" stroke-width="1.5"></polygon>
+          <polygon points="48,28 54,48 43,46" fill="#ffffff" opacity="0.9"></polygon>
+          <circle cx="22" cy="28" r="3" fill="#fde047"></circle>
+          <circle cx="80" cy="24" r="2.5" fill="#fb923c"></circle>
+          <circle cx="77" cy="14" r="1.8" fill="#ffffff"></circle>
+        </svg></div>
+      </div>
+    </div>
+
+    <!-- MODAL POP-UP PREGUNTA: PREGUNTA A LA PART SUPERIOR I 3 RESPOSTES A LA PART INFERIOR -->
+    <div class="modal-overlay" id="quiz-modal" style="display: none;">
+      <div class="modal-quiz">
+        <!-- PART SUPERIOR: TEMPORITZADOR + PREGUNTA + IMATGE + ÀUDIO -->
+        <div class="quiz-top-section">
+          <div class="quiz-timer-bar-container" id="quiz-timer-container" style="display: none;">
+            <div class="quiz-timer-bar" id="quiz-timer-bar"></div>
+            <div class="quiz-timer-text" id="quiz-timer-text">15s</div>
+          </div>
+
+          <div class="question-header-badge" id="ui-quiz-badge">🎵 Direcció del So</div>
+          <div class="question-title" id="quiz-question">Cap a on va aquest so?</div>
+
+          <div class="quiz-image-container" id="quiz-img-container" style="display: none;">
+            <img id="quiz-image" class="quiz-image" src="" alt="Imatge del so">
+          </div>
+
+          <div class="quiz-audio-container" id="quiz-audio-container">
+            <div class="audio-wave-indicator" id="audio-status-text">🔊 Escolta la melodia...</div>
+            <button type="button" class="btn-replay-audio" onclick="replayCurrentQuestionAudio()">
+              <span>🔁</span>
+              <span id="ui-btn-replay">Tornar a escoltar</span>
+            </button>
+            <audio id="quiz-audio-player" class="quiz-audio-player" controls="" autoplay="" src="" style="display: none;"></audio>
+          </div>
+        </div>
+
+        <div class="feedback-msg" id="feedback-msg" style="display: none;"></div>
+
+        <!-- PART INFERIOR: 3 POSSIBLES RESPOSTES (PUJA, IGUAL, BAIXA) -->
+        <div class="quiz-answers-grid">
+          <!-- 1. PUJA: Fletxa inclinada cap a la dreta-amunt (↗) -->
+          <button type="button" class="direction-choice-btn btn-puja" id="btn-choice-puja" onclick="selectDirectionAnswer('puja')">
+            <svg class="direction-arrow-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M50 14L20 14L30 24L12 42L22 52L40 34L50 44L50 14Z" fill="#FFCC00" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"></path>
+            </svg>
+            <span id="ui-choice-puja">Puja</span>
+          </button>
+
+          <!-- 2. IGUAL: Fletxa cap a la dreta (→) -->
+          <button type="button" class="direction-choice-btn btn-igual" id="btn-choice-igual" onclick="selectDirectionAnswer('igual')">
+            <svg class="direction-arrow-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M54 32L34 12V24H10V40H34V52L54 32Z" fill="#FFCC00" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"></path>
+            </svg>
+            <span id="ui-choice-igual">Igual</span>
+          </button>
+
+          <!-- 3. BAIXA: Fletxa inclinada cap a la dreta-baix (↘) -->
+          <button type="button" class="direction-choice-btn btn-baixa" id="btn-choice-baixa" onclick="selectDirectionAnswer('baixa')">
+            <svg class="direction-arrow-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M50 50L50 20L40 30L22 12L12 22L30 40L20 50L50 50Z" fill="#FFCC00" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"></path>
+            </svg>
+            <span id="ui-choice-baixa">Baixa</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE CELEBRACIÓ INDIVIDUAL D'UNA PEDRA -->
+    <div class="single-gem-celebration-screen" id="single-gem-celebration-screen" style="display: none;">
+      <div class="single-gem-rays"></div>
+      <div class="festive-decorations">
+        <span>🎉</span><span>🎈</span><span>✨</span>
+        <span>🎊</span><span>⭐</span><span>🌟</span>
+      </div>
+      <div class="celebration-title" id="single-celebration-title" style="z-index: 10;">🌟 ENHORABONA! 🌟</div>
+      <div class="celebration-subtitle" id="single-celebration-subtitle" style="z-index: 10;">HAS ACONSEGUIT LA PEDRA DE FOC!</div>
+      
+      <div class="single-gem-hero-wrapper">
+        <div class="single-gem-halo"></div>
+        <div class="single-gem-char" id="single-cel-char-avatar"></div>
+        <div class="single-gem-obj" id="single-cel-gem-icon"></div>
+      </div>
+
+      <button class="btn-action" id="ui-btn-continue-cel" style="background: #eab308; color: #000; font-size: 1.2rem; padding: 16px 36px; border: 3px solid #fff; border-radius: 50px; box-shadow: 0 6px 0 #ca8a04, 0 10px 25px rgba(0,0,0,0.6); z-index: 10;" onclick="proceedAfterSingleCelebration()">CONTINUAR 🚀</button>
+    </div>
+
+    <!-- PANTALLA DE RESULTATS FINALS -->
+    <div class="results-screen" id="results-screen" style="display: none;">
+      <div class="results-card">
+        <div class="results-title" id="results-title">MOLT BÉ!</div>
+        
+        <div class="gem-unlocked-banner" id="gem-unlocked-banner">
+          <span style="width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;" id="banner-gem-icon"></span>
+          <span id="banner-gem-text">Has aconseguit la Pedra de Foc!</span>
+        </div>
+
+        <div class="stats-grid">
+          <div>🎯 <span id="ui-stat-correct-lbl">Encerts:</span> <b id="stat-correct" style="color: #22c55e;">0</b></div>
+          <div>❌ <span id="ui-stat-wrong-lbl">Fallades:</span> <b id="stat-wrong" style="color: #ef4444;">0</b></div>
+          <div>📊 <span id="ui-stat-acc-lbl">Precisió:</span> <b id="stat-accuracy" style="color: #38bdf8;">0%</b></div>
+          <div>⏱️ <span id="ui-stat-time-lbl">Temps Total:</span> <b id="stat-time" style="color: #fff;">0s</b></div>
+        </div>
+        <button class="btn-action" id="ui-btn-results-home" onclick="exitToStartScreen()">🔄 TORNAR A L'INICI</button>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE CELEBRACIÓ DELS 4 PEDRES -->
+    <div class="grand-celebration-screen" id="grand-celebration-screen" style="display: none;">
+      <div class="festive-decorations">
+        <span>🎉</span><span>🎈</span><span>✨</span>
+        <span>🎊</span><span>👑</span><span>⭐</span>
+      </div>
+      <div class="celebration-title" id="ui-grand-cel-title">🏆 GRAN CAMPIÓ! 🏆</div>
+      <div class="celebration-subtitle" id="celebration-hero-name">ENHORABONA! HAS ACONSEGUIT LES 4 PEDRES ELEMENTALS AL CIM!</div>
+      
+      <div class="celebration-hero-wrapper">
+        <div class="celebration-halo"></div>
+        <div class="celebration-character" id="celebration-hero-avatar"></div>
+      </div>
+
+      <div class="celebration-animals-bar" id="celebration-gems-bar"></div>
+
+      <button class="btn-action" id="ui-btn-grand-home" style="background: #eab308; color: #000; font-size: 1.15rem; padding: 15px 30px; box-shadow: 0 6px 0 #ca8a04; z-index: 10;" onclick="exitToStartScreen()">🔄 TORNAR A L'INICI</button>
+    </div>
+
+    <!-- MODAL ACCÉS CONFIGURACIÓ (PIN 4 XIFRES) -->
+    <div class="pin-modal" id="pin-modal" style="display: none;">
+      <div class="pin-card">
+        <h3 style="color: #ffcc00; font-size: 1rem;" id="ui-pin-title">🔒 ACCÉS RESTRINGIT</h3>
+        <p style="font-size: 0.8rem; color: #94a3b8;" id="ui-pin-desc">Introdueix la contrasenya de 4 números per accedir a la configuració:</p>
+        <input type="password" maxlength="4" id="pin-input" class="form-control pin-input" placeholder="••••" onkeydown="if(event.key==='Enter') verifyPin()">
+        <p id="pin-error" style="color: #ef4444; font-size: 0.75rem; display: none;">Contrasenya incorrecta!</p>
+        <div style="display: flex; gap: 10px; width: 100%;">
+          <button class="btn-action" style="flex: 1;" onclick="verifyPin()">OK</button>
+          <button class="btn-action btn-close" style="flex: 1; margin-top: 0;" id="ui-pin-cancel" onclick="closePinModal()">CANCEL·LAR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANELL DE CONFIGURACIÓ -->
+    <div class="config-modal" id="config-modal" style="display: flex;">
+      <div class="config-container">
+        <div class="config-tabs">
+          <button class="tab-btn active" id="ui-tab-1" onclick="switchTab(1)">1. DESAR/CARREGAR</button>
+          <button class="tab-btn" id="ui-tab-2" onclick="switchTab(2)">2. PERSONATGES</button>
+          <button class="tab-btn" id="ui-tab-3" onclick="switchTab(3)">3. SONS (DIRECCIÓ)</button>
+          <button class="tab-btn" id="ui-tab-4" onclick="switchTab(4)">4. TEMPORITZADOR</button>
+        </div>
+
+        <div class="tab-content active" id="tab-1">
+          <div class="form-group" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8; gap: 12px;">
+            <label style="color: #38bdf8; font-size: 0.95rem;" id="ui-cfg-files-title">💾 Gestió de Fitxers de Configuració:</label>
+            <p style="font-size: 0.8rem; color: #94a3b8; line-height: 1.4;" id="ui-cfg-files-desc">Pots guardar tots els teus ajustos, àudios i personatges en un fitxer al teu ordinador o carregar un fitxer previ.</p>
+
+            <button class="btn-action" style="background: #8b5cf6;" id="ui-cfg-btn-html" onclick="exportAppHtml()">🌐 Descarregar App Completa en HTML (amb dades incloses)</button>
+
+            <button class="btn-action" style="background: #2563eb;" id="ui-cfg-btn-json" onclick="exportConfigJson()">📥 Descarregar Fitxer de Configuració (JSON)</button>
+            <div style="margin-top: 10px;">
+              <label style="font-size: 0.8rem; color: #ffcc00; display: block; margin-bottom: 5px;" id="ui-cfg-load-json">Carregar fitxer JSON guardat:</label>
+              <input type="file" accept=".json" class="form-control" onchange="importConfigJson(event)">
+            </div>
+            <div id="config-status-banner" style="display: none; padding: 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold;"></div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-2">
+          <div class="form-group">
+            <label id="ui-cfg-p1a-name">Nom Personatge 1A:</label>
+            <input type="text" id="cfg-name-p1a" class="form-control">
+          </div>
+          <div class="form-group">
+            <label id="ui-cfg-p1a-img">Imatge Personatge 1A (URL o fitxer):</label>
+            <input type="text" id="cfg-img-p1a" class="form-control">
+            <input type="file" accept="image/*" onchange="uploadImg(event, 'cfg-img-p1a')">
+          </div>
+          <hr style="border-color: #334155; margin: 10px 0;">
+          <div class="form-group">
+            <label id="ui-cfg-p1b-name">Nom Personatge 1B (Segon Personatge):</label>
+            <input type="text" id="cfg-name-p1b" class="form-control">
+          </div>
+          <div class="form-group">
+            <label id="ui-cfg-p1b-img">Imatge Personatge 1B (URL o fitxer):</label>
+            <input type="text" id="cfg-img-p1b" class="form-control">
+            <input type="file" accept="image/*" onchange="uploadImg(event, 'cfg-img-p1b')">
+          </div>
+          <hr style="border-color: #334155; margin: 10px 0;">
+          <div class="form-group">
+            <label id="ui-cfg-bg-img">Imatge de Fons Escenari (URL o fitxer):</label>
+            <input type="text" id="cfg-bg-img" class="form-control">
+            <input type="file" accept="image/*" onchange="uploadImg(event, 'cfg-bg-img')">
+          </div>
+        </div>
+
+        <div class="tab-content" id="tab-3">
+          <!-- APARTAT D'IMPORTACIÓ EN BLOC DES D'UN TEXT (COPIA I PEGA) -->
+          <div class="form-group" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8;">
+            <label style="color: #38bdf8; font-size: 0.95rem;" id="ui-cfg-bulk-title">📋 Importar Sons en Bloc (Copiar i Enganxar):</label>
+            <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px; line-height: 1.4;" id="ui-cfg-bulk-desc">Escriu o enganxa una llista de sons separats per línies buides. Pots incloure opcionalment DIRECCIO: puja / igual / baixa, IMG: URL i AUDIO: URL.</p>
+            <textarea id="bulk-import-text" class="form-control" placeholder="..."></textarea>
+            <button class="btn-action" style="margin-top: 10px; background: #0284c7;" id="ui-cfg-bulk-btn" onclick="importBulkQuestions()">📥 IMPORTAR LLISTAT DE SONS</button>
+          </div>
+
+          <hr style="border-color: #334155; margin: 5px 0;">
+
+          <div class="form-group" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #ffcc00;">
+            <label id="form-q-title" style="font-size: 1rem; color: #ffcc00; font-weight: bold;">Afegir o Modificar So (Puja / Igual / Baixa):</label>
+            <input type="hidden" id="editing-q-index" value="-1">
+            
+            <div class="form-group" style="margin-top: 10px;">
+              <label id="ui-cfg-q-text">Pregunta o pista:</label>
+              <input type="text" id="new-q-text" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label id="ui-cfg-q-dir">Direcció correcta:</label>
+              <select id="new-q-direction" class="form-control">
+                <option value="puja" id="ui-opt-puja">↗️ Puja</option>
+                <option value="igual" id="ui-opt-igual">➡️ Igual</option>
+                <option value="baixa" id="ui-opt-baixa">↘️ Baixa</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label id="ui-cfg-q-audio">Àudio/So (URL o fitxer MP3/WAV):</label>
+              <input type="text" id="new-q-audio" class="form-control">
+              <input type="file" accept="audio/*" onchange="uploadAudio(event, 'new-q-audio')">
+            </div>
+
+            <div class="form-group">
+              <label id="ui-cfg-q-img">Imatge d'acompanyament (URL o fitxer) *opcional:</label>
+              <input type="text" id="new-q-img" class="form-control">
+              <input type="file" accept="image/*" onchange="uploadImg(event, 'new-q-img')">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="btn-action" id="btn-save-question" style="flex: 2;" onclick="addOrUpdateQuestion()">+ AFEGIR SO</button>
+              <button class="btn-action btn-close" id="btn-cancel-edit" style="flex: 1; margin-top: 0; display: none;" onclick="resetQuestionForm()">CANCEL·LAR</button>
+            </div>
+          </div>
+
+          <label style="color: #ffcc00; font-size: 0.9rem; margin-top: 15px;" id="ui-cfg-q-list-title">Llista de Sons Configurats:</label>
+          <div id="questions-list" style="display: flex; flex-direction: column; gap: 8px;"><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#1</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↗️ PUJA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(0)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(0)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#2</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↗️ PUJA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(1)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(1)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#3</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↗️ PUJA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(2)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(2)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#4</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↗️ PUJA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(3)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(3)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#5</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↘️ BAIXA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(4)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(4)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#6</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↘️ BAIXA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(5)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(5)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#7</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↘️ BAIXA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(6)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(6)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#8</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">↘️ BAIXA</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(7)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(7)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#9</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">➡️ IGUAL</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(8)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(8)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#10</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">➡️ IGUAL</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(9)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(9)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#11</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">➡️ IGUAL</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(10)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(10)">🗑️ Esborrar</button>
+          </div>
+        </div><div class="q-item">
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#12</b> - Cap a on va aquest so?</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">➡️ IGUAL</span>
+              <span style="color: #38bdf8;">🎵 Àudio personalitzat</span>
+              
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(11)">✏️ Editar</button>
+            <button class="btn-delete-q" onclick="removeQuestion(11)">🗑️ Esborrar</button>
+          </div>
+        </div></div>
+        </div>
+
+        <div class="tab-content" id="tab-4">
+          <div class="form-group" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #38bdf8;">
+            <label style="color: #38bdf8; font-size: 0.95rem;" id="ui-cfg-timer-title">⏱️ Configuració del Temporitzador (Mode amb temps):</label>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.4;" id="ui-cfg-timer-desc">Estableix el temps en segons que tindrà el nen/a per a respondre cada so.</p>
+            <label for="cfg-timer-seconds" id="ui-cfg-timer-lbl">Temps per pregunta (segons):</label>
+            <input type="number" id="cfg-timer-seconds" class="form-control" min="3" max="120" value="15">
+          </div>
+        </div>
+
+        <button class="btn-action" style="margin-top: 15px;" id="ui-cfg-save-btn" onclick="saveConfig()">GUARDAR I APLICAR</button>
+        <button class="btn-action btn-close" id="ui-cfg-close-btn" onclick="closeConfig()">CANCEL·LAR</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DICCIONARI DE TRADUCCIONS (VALENCIÀ, CASTELLANO, ENGLISH)
+    const I18N = {
+      va: {
+        htmlLang: 'ca',
+        docTitle: 'Direcció del So - Puja la Muntanya! (Infantil)',
+        btnExit: '❌ SORTIR',
+        btnConfigTop: '⚙️ CONFIG',
+        startTitle: 'DIRECCIÓ DEL SO',
+        gemsTrackerTitle: '💎 LES 4 PEDRES PRECIOSES AL CIM:',
+        btnResetGems: '🔄 Reiniciar Pedres Precioses',
+        btnPlayNoTimer: '🎵 Jugar (sense temps)',
+        btnPlayTimer: '⏱️ Jugar (amb temps)',
+        btnStartConfig: '⚙️ CONFIGURACIÓ',
+        btnChangeLang: '🌐 IDIOMA (VALENCIÀ)',
+        resetTitle: '🔄 REINICIAR PEDRES PRECIOSES',
+        resetDesc: 'Vols reiniciar el progrés de les 4 pedres precioses aconseguides?',
+        btnConfirmReset: 'SÍ, REINICIAR',
+        btnCancel: 'CANCEL·LAR',
+        selectGemTitle: '1. TRIA LA PEDRA PRECIOSA QUE VOLS ACONSEGUIR',
+        selectCharTitle: '2. TRIA EL TEU PERSONATGE',
+        btnStartConfirm: '🚀 COMENÇAR!',
+        unlockedBadge: 'ACONSEGUIDA 🏆',
+        lockedBadge: 'PENDENT 🔒',
+        statusUnlocked: 'Aconseguida',
+        statusInProgress: 'En curs',
+        statusPending: 'Pendent',
+        stepLabel: 'PAS',
+        quizBadge: '🎵 Direcció del So',
+        defaultQuestion: 'Cap a on va aquest so?',
+        audioListenDefault: '🔊 Escolta la melodia...',
+        audioPlaying: "🔊 S'està reproduint el so...",
+        audioTapReplay: "👆 Prem 'Tornar a escoltar' per sentir el so",
+        audioListenNotes: '🔊 Escolta la direcció de les notes...',
+        btnReplay: 'Tornar a escoltar',
+        choicePuja: 'Puja',
+        choiceIgual: 'Igual',
+        choiceBaixa: 'Baixa',
+        msgTimeout: "⏰ S'HA ACABAT EL TEMPS!",
+        msgPuja: '↗️ EL SO PUJA!',
+        msgIgual: '➡️ EL SO ES MANTÉ IGUAL!',
+        msgBaixa: '↘️ EL SO BAIXA!',
+        floatCorrect: 'MOLT BÉ! +1 PAS ⛰️',
+        floatTimeout: 'TEMPS AGOTAT! -1 PAS 🔙',
+        floatWrong: 'TORNA-HO A PROVAR! -1 PAS 🔙',
+        singleCelTitle: (name) => `🌟 ENHORABONA, ${name.toUpperCase()}! 🌟`,
+        singleCelSub: (gem) => `HAS ACONSEGUIT LA ${gem.toUpperCase()}!`,
+        btnContinue: 'CONTINUAR 🚀',
+        resultsWinTitle: (name) => `🏆 MOLT BÉ, ${name}!`,
+        resultsLoseTitle: 'TORNA-HO A INTENTAR!',
+        bannerGemText: (gem, count) => `Has aconseguit la ${gem}! (${count}/4)`,
+        statCorrect: 'Encerts:',
+        statWrong: 'Fallades:',
+        statAcc: 'Precisió:',
+        statTime: 'Temps Total:',
+        btnBackHome: "🔄 TORNAR A L'INICI",
+        grandCelTitle: '🏆 GRAN CAMPIÓ! 🏆',
+        grandCelSub: (name) => `🌟 ENHORABONA, ${name.toUpperCase()}! 🌟\nHAS ACONSEGUIT LES 4 PEDRES ELEMENTALS AL CIM!`,
+        pinTitle: '🔒 ACCÉS RESTRINGIT',
+        pinDesc: 'Introdueix la contrasenya de 4 números per accedir a la configuració:',
+        pinError: 'Contrasenya incorrecta!',
+        tab1: '1. DESAR/CARREGAR',
+        tab2: '2. PERSONATGES',
+        tab3: '3. SONS (DIRECCIÓ)',
+        tab4: '4. TEMPORITZADOR',
+        cfgFilesTitle: '💾 Gestió de Fitxers de Configuració:',
+        cfgFilesDesc: 'Pots guardar tots els teus ajustos, àudios i personatges en un fitxer al teu ordinador o carregar un fitxer previ.',
+        cfgBtnHtml: '🌐 Descarregar App Completa en HTML (amb dades incloses)',
+        cfgBtnJson: '📥 Descarregar Fitxer de Configuració (JSON)',
+        cfgLoadJson: 'Carregar fitxer JSON guardat:',
+        cfgJsonOk: '✅ Configuració carregada correctament des del fitxer!',
+        cfgJsonInvalid: '❌ El format del fitxer JSON no és vàlid.',
+        cfgJsonErr: '❌ Error al llegir el fitxer JSON.',
+        cfgP1aName: 'Nom Personatge 1A:',
+        cfgP1aImg: 'Imatge Personatge 1A (URL o fitxer):',
+        cfgP1bName: 'Nom Personatge 1B (Segon Personatge):',
+        cfgP1bImg: 'Imatge Personatge 1B (URL o fitxer):',
+        cfgBgImg: 'Imatge de Fons Escenari (URL o fitxer):',
+        cfgBulkTitle: '📋 Importar Sons en Bloc (Copiar i Enganxar):',
+        cfgBulkDesc: 'Escriu o enganxa una llista de sons separats per línies buides. Pots incloure opcionalment DIRECCIO: puja / igual / baixa, IMG: URL i AUDIO: URL.',
+        cfgBulkBtn: '📥 IMPORTAR LLISTAT DE SONS',
+        cfgFormAddTitle: 'Afegir o Modificar So (Puja / Igual / Baixa):',
+        cfgFormEditTitle: (n) => `✏️ Modificant So #${n}:`,
+        cfgQText: 'Pregunta o pista:',
+        cfgQDir: 'Direcció correcta:',
+        cfgQAudio: 'Àudio/So (URL o fitxer MP3/WAV):',
+        cfgQImg: "Imatge d'acompanyament (URL o fitxer) *opcional:",
+        btnAddSound: '+ AFEGIR SO',
+        btnSaveEdit: '💾 GUARDAR MODIFICACIÓ',
+        cfgQListTitle: 'Llista de Sons Configurats:',
+        cfgNoSounds: 'No hi ha cap so configurat.',
+        tagCustomAudio: '🎵 Àudio personalitzat',
+        tagAutoAudio: '🎹 Melodia automàtica',
+        tagWithImg: '🖼️ Amb imatge',
+        btnEdit: '✏️ Editar',
+        btnDelete: '🗑️ Esborrar',
+        cfgTimerTitle: '⏱️ Configuració del Temporitzador (Mode amb temps):',
+        cfgTimerDesc: 'Estableix el temps en segons que tindrà el nen/a per a respondre cada so.',
+        cfgTimerLbl: 'Temps per pregunta (segons):',
+        btnSaveApply: 'GUARDAR I APLICAR',
+        gems: {
+          elem_foc: 'Pedra de Foc',
+          elem_aigua: "Pedra d'Aigua",
+          elem_terra: 'Pedra de Terra',
+          elem_aire: "Pedra d'Aire"
+        },
+        defaultQuestions: [
+          "Cap a on van les notes d'aquesta melodia?",
+          "Escolta el campaner: les notes pugen, van igual o baixen?",
+          "Com es mou aquest so musical?",
+          "El coet s'enlaira cap al cel! Cap a on va el so?",
+          "El tren avança per la via recta: cap a on va la nota?",
+          "Baixem pel tobogan! Cap a on va la melodia?",
+          "Pugem les escales del castell: cap a on va el so?",
+          "Caminem pel camí pla sense pujar ni baixar: com és el so?",
+          "Les fulles cauen de l'arbre a la tardor: cap a on va el so?",
+          "L'ocell vola cada vegada més amunt! Cap a on va el so?",
+          "Un robot parla sempre amb la mateixa nota: cap a on va?",
+          "El submarí s'enfonsa al fons del mar: cap a on va el so?"
+        ]
+      },
+      es: {
+        htmlLang: 'es',
+        docTitle: 'Dirección del Sonido - ¡Sube la Montaña! (Infantil)',
+        btnExit: '❌ SALIR',
+        btnConfigTop: '⚙️ CONFIG',
+        startTitle: 'DIRECCIÓN DEL SONIDO',
+        gemsTrackerTitle: '💎 LAS 4 PIEDRAS PRECIOSAS EN LA CIMA:',
+        btnResetGems: '🔄 Reiniciar Piedras Preciosas',
+        btnPlayNoTimer: '🎵 Jugar (sin tiempo)',
+        btnPlayTimer: '⏱️ Jugar (con tiempo)',
+        btnStartConfig: '⚙️ CONFIGURACIÓN',
+        btnChangeLang: '🌐 IDIOMA (CASTELLANO)',
+        resetTitle: '🔄 REINICIAR PIEDRAS PRECIOSAS',
+        resetDesc: '¿Quieres reiniciar el progreso de las 4 piedras preciosas conseguidas?',
+        btnConfirmReset: 'SÍ, REINICIAR',
+        btnCancel: 'CANCELAR',
+        selectGemTitle: '1. ELIGE LA PIEDRA PRECIOSA QUE QUIERES CONSEGUIR',
+        selectCharTitle: '2. ELIGE TU PERSONAJE',
+        btnStartConfirm: '🚀 ¡EMPEZAR!',
+        unlockedBadge: 'CONSEGUIDA 🏆',
+        lockedBadge: 'PENDIENTE 🔒',
+        statusUnlocked: 'Conseguida',
+        statusInProgress: 'En curso',
+        statusPending: 'Pendiente',
+        stepLabel: 'PASO',
+        quizBadge: '🎵 Dirección del Sonido',
+        defaultQuestion: '¿Hacia dónde va este sonido?',
+        audioListenDefault: '🔊 Escucha la melodía...',
+        audioPlaying: '🔊 Se está reproduciendo el sonido...',
+        audioTapReplay: "👆 Pulsa 'Volver a escuchar' para oír el sonido",
+        audioListenNotes: '🔊 Escucha la dirección de las notas...',
+        btnReplay: 'Volver a escuchar',
+        choicePuja: 'Sube',
+        choiceIgual: 'Igual',
+        choiceBaixa: 'Baja',
+        msgTimeout: '⏰ ¡SE ACABÓ EL TIEMPO!',
+        msgPuja: '↗️ ¡EL SONIDO SUBE!',
+        msgIgual: '➡️ ¡EL SONIDO SE MANTIENE IGUAL!',
+        msgBaixa: '↘️ ¡EL SONIDO BAJA!',
+        floatCorrect: '¡MUY BIEN! +1 PASO ⛰️',
+        floatTimeout: '¡TIEMPO AGOTADO! -1 PASO 🔙',
+        floatWrong: '¡INTÉNTALO DE NUEVO! -1 PASO 🔙',
+        singleCelTitle: (name) => `🌟 ¡ENHORABUENA, ${name.toUpperCase()}! 🌟`,
+        singleCelSub: (gem) => `¡HAS CONSEGUIDO LA ${gem.toUpperCase()}!`,
+        btnContinue: 'CONTINUAR 🚀',
+        resultsWinTitle: (name) => `🏆 ¡MUY BIEN, ${name}!`,
+        resultsLoseTitle: '¡INTÉNTALO DE NUEVO!',
+        bannerGemText: (gem, count) => `¡Has conseguido la ${gem}! (${count}/4)`,
+        statCorrect: 'Aciertos:',
+        statWrong: 'Fallos:',
+        statAcc: 'Precisión:',
+        statTime: 'Tiempo Total:',
+        btnBackHome: '🔄 VOLVER AL INICIO',
+        grandCelTitle: '🏆 ¡GRAN CAMPEÓN! 🏆',
+        grandCelSub: (name) => `🌟 ¡ENHORABUENA, ${name.toUpperCase()}! 🌟\n¡HAS CONSEGUIDO LAS 4 PIEDRAS ELEMENTALES EN LA CIMA!`,
+        pinTitle: '🔒 ACCESO RESTRINGIDO',
+        pinDesc: 'Introduce la contraseña de 4 números para acceder a la configuración:',
+        pinError: '¡Contraseña incorrecta!',
+        tab1: '1. GUARDAR/CARGAR',
+        tab2: '2. PERSONAJES',
+        tab3: '3. SONIDOS (DIRECCIÓN)',
+        tab4: '4. TEMPORIZADOR',
+        cfgFilesTitle: '💾 Gestión de Archivos de Configuración:',
+        cfgFilesDesc: 'Puedes guardar todos tus ajustes, audios y personajes en un archivo en tu ordenador o cargar uno previo.',
+        cfgBtnHtml: '🌐 Descargar App Completa en HTML (con datos incluidos)',
+        cfgBtnJson: '📥 Descargar Archivo de Configuración (JSON)',
+        cfgLoadJson: 'Cargar archivo JSON guardado:',
+        cfgJsonOk: '✅ ¡Configuración cargada correctamente desde el archivo!',
+        cfgJsonInvalid: '❌ El formato del archivo JSON no es válido.',
+        cfgJsonErr: '❌ Error al leer el archivo JSON.',
+        cfgP1aName: 'Nombre Personaje 1A:',
+        cfgP1aImg: 'Imagen Personaje 1A (URL o archivo):',
+        cfgP1bName: 'Nombre Personaje 1B (Segundo Personaje):',
+        cfgP1bImg: 'Imagen Personaje 1B (URL o archivo):',
+        cfgBgImg: 'Imagen de Fondo Escenario (URL o archivo):',
+        cfgBulkTitle: '📋 Importar Sonidos en Bloque (Copiar y Pegar):',
+        cfgBulkDesc: 'Escribe o pega una lista de sonidos separados por líneas vacías. Puedes incluir opcionalmente DIRECCIO: sube / igual / baja, IMG: URL y AUDIO: URL.',
+        cfgBulkBtn: '📥 IMPORTAR LISTADO DE SONIDOS',
+        cfgFormAddTitle: 'Añadir o Modificar Sonido (Sube / Igual / Baja):',
+        cfgFormEditTitle: (n) => `✏️ Modificando Sonido #${n}:`,
+        cfgQText: 'Pregunta o pista:',
+        cfgQDir: 'Dirección correcta:',
+        cfgQAudio: 'Audio/Sonido (URL o archivo MP3/WAV):',
+        cfgQImg: 'Imagen de acompañamiento (URL o archivo) *opcional:',
+        btnAddSound: '+ AÑADIR SONIDO',
+        btnSaveEdit: '💾 GUARDAR MODIFICACIÓN',
+        cfgQListTitle: 'Lista de Sonidos Configurados:',
+        cfgNoSounds: 'No hay ningún sonido configurado.',
+        tagCustomAudio: '🎵 Audio personalizado',
+        tagAutoAudio: '🎹 Melodía automática',
+        tagWithImg: '🖼️ Con imagen',
+        btnEdit: '✏️ Editar',
+        btnDelete: '🗑️ Borrar',
+        cfgTimerTitle: '⏱️ Configuración del Temporizador (Modo con tiempo):',
+        cfgTimerDesc: 'Establece el tiempo en segundos que tendrá el niño/a para responder cada sonido.',
+        cfgTimerLbl: 'Tiempo por pregunta (segundos):',
+        btnSaveApply: 'GUARDAR Y APLICAR',
+        gems: {
+          elem_foc: 'Piedra de Fuego',
+          elem_aigua: 'Piedra de Agua',
+          elem_terra: 'Piedra de Tierra',
+          elem_aire: 'Piedra de Aire'
+        },
+        defaultQuestions: [
+          "¿Hacia dónde van las notas de esta melodía?",
+          "Escucha el campanario: ¿las notas suben, van igual o bajan?",
+          "¿Cómo se mueve este sonido musical?",
+          "¡El cohete despega hacia el cielo! ¿Hacia dónde va el sonido?",
+          "El tren avanza por la vía recta: ¿hacia dónde va la nota?",
+          "¡Bajamos por el tobogán! ¿Hacia dónde va la melodía?",
+          "Subimos las escaleras del castillo: ¿hacia dónde va el sonido?",
+          "Caminamos por el camino llano sin subir ni bajar: ¿cómo es el sonido?",
+          "Las hojas caen del árbol en otoño: ¿hacia dónde va el sonido?",
+          "¡El pájaro vuela cada vez más alto! ¿Hacia dónde va el sonido?",
+          "Un robot habla siempre con la misma nota: ¿hacia dónde va?",
+          "El submarino se hunde en el fondo del mar: ¿hacia dónde va el sonido?"
+        ]
+      },
+      en: {
+        htmlLang: 'en',
+        docTitle: 'Sound Direction - Climb the Mountain! (Kids)',
+        btnExit: '❌ EXIT',
+        btnConfigTop: '⚙️ CONFIG',
+        startTitle: 'SOUND DIRECTION',
+        gemsTrackerTitle: '💎 THE 4 PRECIOUS GEMS AT THE SUMMIT:',
+        btnResetGems: '🔄 Reset Precious Gems',
+        btnPlayNoTimer: '🎵 Play (no timer)',
+        btnPlayTimer: '⏱️ Play (with timer)',
+        btnStartConfig: '⚙️ SETTINGS',
+        btnChangeLang: '🌐 LANGUAGE (ENGLISH)',
+        resetTitle: '🔄 RESET PRECIOUS GEMS',
+        resetDesc: 'Do you want to reset the progress of the 4 collected gems?',
+        btnConfirmReset: 'YES, RESET',
+        btnCancel: 'CANCEL',
+        selectGemTitle: '1. CHOOSE THE GEM YOU WANT TO COLLECT',
+        selectCharTitle: '2. CHOOSE YOUR CHARACTER',
+        btnStartConfirm: '🚀 START!',
+        unlockedBadge: 'COLLECTED 🏆',
+        lockedBadge: 'LOCKED 🔒',
+        statusUnlocked: 'Collected',
+        statusInProgress: 'In progress',
+        statusPending: 'Locked',
+        stepLabel: 'STEP',
+        quizBadge: '🎵 Sound Direction',
+        defaultQuestion: 'Which way is this sound going?',
+        audioListenDefault: '🔊 Listen to the melody...',
+        audioPlaying: '🔊 Playing sound...',
+        audioTapReplay: "👆 Tap 'Listen again' to hear the sound",
+        audioListenNotes: '🔊 Listen to the direction of the notes...',
+        btnReplay: 'Listen again',
+        choicePuja: 'Up',
+        choiceIgual: 'Same',
+        choiceBaixa: 'Down',
+        msgTimeout: "⏰ TIME'S UP!",
+        msgPuja: '↗️ THE SOUND GOES UP!',
+        msgIgual: '➡️ THE SOUND STAYS THE SAME!',
+        msgBaixa: '↘️ THE SOUND GOES DOWN!',
+        floatCorrect: 'GREAT JOB! +1 STEP ⛰️',
+        floatTimeout: "TIME'S UP! -1 STEP 🔙",
+        floatWrong: 'TRY AGAIN! -1 STEP 🔙',
+        singleCelTitle: (name) => `🌟 CONGRATULATIONS, ${name.toUpperCase()}! 🌟`,
+        singleCelSub: (gem) => `YOU COLLECTED THE ${gem.toUpperCase()}!`,
+        btnContinue: 'CONTINUE 🚀',
+        resultsWinTitle: (name) => `🏆 GREAT JOB, ${name}!`,
+        resultsLoseTitle: 'TRY AGAIN!',
+        bannerGemText: (gem, count) => `You collected the ${gem}! (${count}/4)`,
+        statCorrect: 'Correct:',
+        statWrong: 'Mistakes:',
+        statAcc: 'Accuracy:',
+        statTime: 'Total Time:',
+        btnBackHome: '🔄 BACK TO HOME',
+        grandCelTitle: '🏆 GRAND CHAMPION! 🏆',
+        grandCelSub: (name) => `🌟 CONGRATULATIONS, ${name.toUpperCase()}! 🌟\nYOU COLLECTED ALL 4 ELEMENTAL GEMS AT THE SUMMIT!`,
+        pinTitle: '🔒 RESTRICTED ACCESS',
+        pinDesc: 'Enter the 4-digit PIN to access settings:',
+        pinError: 'Incorrect PIN!',
+        tab1: '1. SAVE/LOAD',
+        tab2: '2. CHARACTERS',
+        tab3: '3. SOUNDS (DIRECTION)',
+        tab4: '4. TIMER',
+        cfgFilesTitle: '💾 Configuration File Management:',
+        cfgFilesDesc: 'You can save all your settings, audio, and characters to a file on your computer or load a previous one.',
+        cfgBtnHtml: '🌐 Download Full App in HTML (with data included)',
+        cfgBtnJson: '📥 Download Configuration File (JSON)',
+        cfgLoadJson: 'Load saved JSON file:',
+        cfgJsonOk: '✅ Configuration loaded successfully from file!',
+        cfgJsonInvalid: '❌ Invalid JSON file format.',
+        cfgJsonErr: '❌ Error reading JSON file.',
+        cfgP1aName: 'Character 1A Name:',
+        cfgP1aImg: 'Character 1A Image (URL or file):',
+        cfgP1bName: 'Character 1B Name (Second Character):',
+        cfgP1bImg: 'Character 1B Image (URL or file):',
+        cfgBgImg: 'Background Image (URL or file):',
+        cfgBulkTitle: '📋 Bulk Import Sounds (Copy & Paste):',
+        cfgBulkDesc: 'Type or paste a list of sounds separated by blank lines. You can optionally include DIRECCIO: up / same / down, IMG: URL and AUDIO: URL.',
+        cfgBulkBtn: '📥 IMPORT SOUND LIST',
+        cfgFormAddTitle: 'Add or Edit Sound (Up / Same / Down):',
+        cfgFormEditTitle: (n) => `✏️ Editing Sound #${n}:`,
+        cfgQText: 'Question or hint:',
+        cfgQDir: 'Correct direction:',
+        cfgQAudio: 'Audio/Sound (URL or MP3/WAV file):',
+        cfgQImg: 'Accompanying image (URL or file) *optional:',
+        btnAddSound: '+ ADD SOUND',
+        btnSaveEdit: '💾 SAVE CHANGES',
+        cfgQListTitle: 'Configured Sounds List:',
+        cfgNoSounds: 'No sounds configured.',
+        tagCustomAudio: '🎵 Custom audio',
+        tagAutoAudio: '🎹 Auto melody',
+        tagWithImg: '🖼️ With image',
+        btnEdit: '✏️ Edit',
+        btnDelete: '🗑️ Delete',
+        cfgTimerTitle: '⏱️ Timer Settings (Timed mode):',
+        cfgTimerDesc: 'Set the time in seconds the child will have to answer each sound.',
+        cfgTimerLbl: 'Time per question (seconds):',
+        btnSaveApply: 'SAVE & APPLY',
+        gems: {
+          elem_foc: 'Fire Gem',
+          elem_aigua: 'Water Gem',
+          elem_terra: 'Earth Gem',
+          elem_aire: 'Air Gem'
+        },
+        defaultQuestions: [
+          "Which way are the notes in this melody going?",
+          "Listen to the bell: do the notes go up, stay the same, or go down?",
+          "How does this musical sound move?",
+          "The rocket blasts off into the sky! Which way does the sound go?",
+          "The train moves along a flat track: which way does the note go?",
+          "Sliding down the slide! Which way does the melody go?",
+          "Climbing the castle stairs: which way does the sound go?",
+          "Walking on a flat path without going up or down: how is the sound?",
+          "Leaves fall from the tree in autumn: which way does the sound go?",
+          "The bird flies higher and higher! Which way does the sound go?",
+          "A robot always speaks on the same note: which way does it go?",
+          "The submarine dives to the bottom of the sea: which way does the sound go?"
+        ]
+      }
+    };
+
+    let currentLang = localStorage.getItem('direccio_so_lang') || 'va';
+
+    function t(key, ...args) {
+      const dict = I18N[currentLang] || I18N.va;
+      const val = dict[key];
+      if (typeof val === 'function') return val(...args);
+      return val !== undefined ? val : key;
+    }
+
+    function getGemName(gemId) {
+      const dict = I18N[currentLang] || I18N.va;
+      return (dict.gems && dict.gems[gemId]) || gemId;
+    }
+
+    function getLocalizedQuestionText(qData) {
+      if (typeof qData.defaultIdx === 'number') {
+        const dict = I18N[currentLang] || I18N.va;
+        if (dict.defaultQuestions && dict.defaultQuestions[qData.defaultIdx]) {
+          return dict.defaultQuestions[qData.defaultIdx];
+        }
+      }
+      return qData.q || t('defaultQuestion');
+    }
+
+    function applyTranslations() {
+      const dict = I18N[currentLang] || I18N.va;
+      document.documentElement.lang = dict.htmlLang;
+      document.title = dict.docTitle;
+
+      document.getElementById('btn-exit-game').innerText = dict.btnExit;
+      document.getElementById('btn-main-config').innerText = dict.btnConfigTop;
+
+      document.getElementById('ui-start-title').innerText = dict.startTitle;
+      document.getElementById('ui-gems-tracker-title').innerText = dict.gemsTrackerTitle;
+      document.getElementById('ui-btn-reset-gems').innerText = dict.btnResetGems;
+      document.getElementById('ui-btn-play-notimer').innerText = dict.btnPlayNoTimer;
+      document.getElementById('ui-btn-play-timer').innerText = dict.btnPlayTimer;
+      document.getElementById('ui-btn-start-config').innerText = dict.btnStartConfig;
+      document.getElementById('ui-btn-change-lang').innerText = dict.btnChangeLang;
+
+      document.getElementById('ui-reset-title').innerText = dict.resetTitle;
+      document.getElementById('ui-reset-desc').innerText = dict.resetDesc;
+      document.getElementById('ui-btn-confirm-reset').innerText = dict.btnConfirmReset;
+      document.getElementById('ui-btn-cancel-reset').innerText = dict.btnCancel;
+
+      document.getElementById('ui-select-gem-title').innerText = dict.selectGemTitle;
+      document.getElementById('ui-select-char-title').innerText = dict.selectCharTitle;
+      document.getElementById('ui-btn-start-confirm').innerText = dict.btnStartConfirm;
+
+      document.getElementById('ui-quiz-badge').innerText = dict.quizBadge;
+      document.getElementById('ui-btn-replay').innerText = dict.btnReplay;
+      document.getElementById('ui-choice-puja').innerText = dict.choicePuja;
+      document.getElementById('ui-choice-igual').innerText = dict.choiceIgual;
+      document.getElementById('ui-choice-baixa').innerText = dict.choiceBaixa;
+
+      document.getElementById('ui-btn-continue-cel').innerText = dict.btnContinue;
+      document.getElementById('ui-stat-correct-lbl').innerText = dict.statCorrect;
+      document.getElementById('ui-stat-wrong-lbl').innerText = dict.statWrong;
+      document.getElementById('ui-stat-acc-lbl').innerText = dict.statAcc;
+      document.getElementById('ui-stat-time-lbl').innerText = dict.statTime;
+      document.getElementById('ui-btn-results-home').innerText = dict.btnBackHome;
+
+      document.getElementById('ui-grand-cel-title').innerText = dict.grandCelTitle;
+      document.getElementById('ui-btn-grand-home').innerText = dict.btnBackHome;
+
+      document.getElementById('ui-pin-title').innerText = dict.pinTitle;
+      document.getElementById('ui-pin-desc').innerText = dict.pinDesc;
+      document.getElementById('pin-error').innerText = dict.pinError;
+      document.getElementById('ui-pin-cancel').innerText = dict.btnCancel;
+
+      document.getElementById('ui-tab-1').innerText = dict.tab1;
+      document.getElementById('ui-tab-2').innerText = dict.tab2;
+      document.getElementById('ui-tab-3').innerText = dict.tab3;
+      document.getElementById('ui-tab-4').innerText = dict.tab4;
+
+      document.getElementById('ui-cfg-files-title').innerText = dict.cfgFilesTitle;
+      document.getElementById('ui-cfg-files-desc').innerText = dict.cfgFilesDesc;
+      document.getElementById('ui-cfg-btn-html').innerText = dict.cfgBtnHtml;
+      document.getElementById('ui-cfg-btn-json').innerText = dict.cfgBtnJson;
+      document.getElementById('ui-cfg-load-json').innerText = dict.cfgLoadJson;
+
+      document.getElementById('ui-cfg-p1a-name').innerText = dict.cfgP1aName;
+      document.getElementById('ui-cfg-p1a-img').innerText = dict.cfgP1aImg;
+      document.getElementById('ui-cfg-p1b-name').innerText = dict.cfgP1bName;
+      document.getElementById('ui-cfg-p1b-img').innerText = dict.cfgP1bImg;
+      document.getElementById('ui-cfg-bg-img').innerText = dict.cfgBgImg;
+
+      document.getElementById('ui-cfg-bulk-title').innerText = dict.cfgBulkTitle;
+      document.getElementById('ui-cfg-bulk-desc').innerText = dict.cfgBulkDesc;
+      document.getElementById('ui-cfg-bulk-btn').innerText = dict.cfgBulkBtn;
+
+      document.getElementById('ui-cfg-q-text').innerText = dict.cfgQText;
+      document.getElementById('ui-cfg-q-dir').innerText = dict.cfgQDir;
+      document.getElementById('ui-opt-puja').innerText = `↗️ ${dict.choicePuja}`;
+      document.getElementById('ui-opt-igual').innerText = `➡️ ${dict.choiceIgual}`;
+      document.getElementById('ui-opt-baixa').innerText = `↘️ ${dict.choiceBaixa}`;
+      document.getElementById('ui-cfg-q-audio').innerText = dict.cfgQAudio;
+      document.getElementById('ui-cfg-q-img').innerText = dict.cfgQImg;
+      document.getElementById('btn-cancel-edit').innerText = dict.btnCancel;
+      document.getElementById('ui-cfg-q-list-title').innerText = dict.cfgQListTitle;
+
+      document.getElementById('ui-cfg-timer-title').innerText = dict.cfgTimerTitle;
+      document.getElementById('ui-cfg-timer-desc').innerText = dict.cfgTimerDesc;
+      document.getElementById('ui-cfg-timer-lbl').innerText = dict.cfgTimerLbl;
+
+      document.getElementById('ui-cfg-save-btn').innerText = dict.btnSaveApply;
+      document.getElementById('ui-cfg-close-btn').innerText = dict.btnCancel;
+
+      renderGemsTracker();
+      renderHudGems();
+      updateProgressVisuals();
+    }
+
+    function openLanguageScreen() {
+      stopQuestionTimer();
+      stopQuizAudio();
+      stopFestiveCelebrationMusic();
+      stopContinuousCelebrationConfetti();
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('btn-main-config').style.display = 'none';
+      document.getElementById('btn-exit-game').style.display = 'none';
+      document.getElementById('lang-screen').style.display = 'flex';
+    }
+
+    function selectLanguage(langCode) {
+      currentLang = langCode;
+      localStorage.setItem('direccio_so_lang', langCode);
+      applyTranslations();
+      document.getElementById('lang-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'flex';
+      document.getElementById('btn-main-config').style.display = 'block';
+      document.getElementById('btn-exit-game').style.display = 'block';
+    }
+
+    // DADES DE LES 4 PEDRES PRECIOSES ELEMENTALS AMB GRÀFICS SVG CREATIUS I DETALLATS
+    const GEM_TYPES = [
+      {
+        id: 'elem_foc',
+        color: '#ef4444',
+        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="fireAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#f97316" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="fireCore" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stop-color="#ea580c"/>
+              <stop offset="55%" stop-color="#facc15"/>
+              <stop offset="100%" stop-color="#ffffff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#fireAura)"/>
+          <path d="M50 6 C62 24 80 34 78 60 C76 80 62 92 50 94 C38 92 24 80 22 60 C20 34 38 24 50 6 Z" fill="#9f1239" stroke="#fde047" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="50,10 73,42 50,52" fill="#fb7185"/>
+          <polygon points="50,10 27,42 50,52" fill="#f97316"/>
+          <polygon points="27,42 50,52 28,74" fill="#be123c"/>
+          <polygon points="73,42 72,74 50,52" fill="#e11d48"/>
+          <polygon points="28,74 50,52 50,91" fill="#881337"/>
+          <polygon points="72,74 50,91 50,52" fill="#4c0519"/>
+          <polygon points="50,24 63,50 50,76 37,50" fill="url(#fireCore)" stroke="#fef08a" stroke-width="1.5"/>
+          <polygon points="48,28 54,48 43,46" fill="#ffffff" opacity="0.9"/>
+          <circle cx="22" cy="28" r="3" fill="#fde047"/>
+          <circle cx="80" cy="24" r="2.5" fill="#fb923c"/>
+          <circle cx="77" cy="14" r="1.8" fill="#ffffff"/>
+        </svg>`
+      },
+      {
+        id: 'elem_aigua',
+        color: '#3b82f6',
+        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="waterAura" cx="50%" cy="55%" r="48%">
+              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.7"/>
+              <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="waterGem" x1="15%" y1="0%" x2="85%" y2="100%">
+              <stop offset="0%" stop-color="#e0f2fe"/>
+              <stop offset="35%" stop-color="#38bdf8"/>
+              <stop offset="75%" stop-color="#0284c7"/>
+              <stop offset="100%" stop-color="#1e3a8a"/>
+            </linearGradient>
+            <linearGradient id="waterInner" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="50%" stop-color="#67e8f9"/>
+              <stop offset="100%" stop-color="#0369a1"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="54" r="46" fill="url(#waterAura)"/>
+          <polygon points="50,8 78,48 70,82 50,93 30,82 22,48" fill="url(#waterGem)" stroke="#bae6fd" stroke-width="2.5" stroke-linejoin="round"/>
+          <polygon points="50,8 78,48 61,52" fill="#7dd3fc" opacity="0.8"/>
+          <polygon points="50,8 22,48 39,52" fill="#e0f2fe" opacity="0.85"/>
+          <polygon points="22,48 39,52 30,82" fill="#0284c7" opacity="0.75"/>
+          <polygon points="78,48 70,82 61,52" fill="#0369a1" opacity="0.85"/>
+          <polygon points="30,82 50,74 50,93" fill="#1e40af"/>
+          <polygon points="70,82 50,93 50,74" fill="#172554"/>
+          <polygon points="50,26 62,52 50,74 38,52" fill="url(#waterInner)" stroke="#ecfeff" stroke-width="1.3"/>
+          <path d="M36 60 Q50 68 64 60" fill="none" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" opacity="0.9"/>
+          <polygon points="48,29 55,47 43,46" fill="#ffffff" opacity="0.95"/>
+          <circle cx="20" cy="34" r="3" fill="#a5f3fc"/>
+          <circle cx="81" cy="38" r="2.5" fill="#67e8f9"/>
+          <circle cx="26" cy="21" r="2" fill="#ffffff"/>
+        </svg>`
+      },
+      {
+        id: 'elem_terra',
+        color: '#22c55e',
+        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="earthAura" cx="50%" cy="50%" r="48%">
+              <stop offset="0%" stop-color="#4ade80" stop-opacity="0.65"/>
+              <stop offset="100%" stop-color="#14532d" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="earthGem" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac"/>
+              <stop offset="45%" stop-color="#16a34a"/>
+              <stop offset="100%" stop-color="#14532d"/>
+            </linearGradient>
+            <linearGradient id="earthTable" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#dcfce7"/>
+              <stop offset="55%" stop-color="#22c55e"/>
+              <stop offset="100%" stop-color="#15803d"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#earthAura)"/>
+          <polygon points="50,8 85,29 85,71 50,92 15,71 15,29" fill="url(#earthGem)" stroke="#fde047" stroke-width="3" stroke-linejoin="round"/>
+          <polygon points="50,8 85,29 67,39 50,28" fill="#bbf7d0" opacity="0.7"/>
+          <polygon points="50,8 15,29 33,39 50,28" fill="#4ade80" opacity="0.8"/>
+          <polygon points="15,29 33,39 33,61 15,71" fill="#15803d" opacity="0.85"/>
+          <polygon points="85,29 85,71 67,61 67,39" fill="#166534" opacity="0.9"/>
+          <polygon points="15,71 33,61 50,72 50,92" fill="#14532d"/>
+          <polygon points="85,71 50,92 50,72 67,61" fill="#052e16"/>
+          <polygon points="50,28 67,39 67,61 50,72 33,61 33,39" fill="url(#earthTable)" stroke="#fef08a" stroke-width="1.6"/>
+          <path d="M50 34 L50 66 M50 45 L60 39 M50 54 L40 48" stroke="#fef08a" stroke-width="2.4" stroke-linecap="round"/>
+          <polygon points="38,34 49,34 42,43" fill="#ffffff" opacity="0.85"/>
+          <circle cx="17" cy="20" r="2.5" fill="#fde047"/>
+          <circle cx="83" cy="80" r="2.5" fill="#fde047"/>
+        </svg>`
+      },
+      {
+        id: 'elem_aire',
+        color: '#a855f7',
+        svg: `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="airAura" cx="50%" cy="50%" r="48%">
+              <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.8"/>
+              <stop offset="55%" stop-color="#c084fc" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#6b21a8" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="airGem" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="45%" stop-color="#bae6fd"/>
+              <stop offset="80%" stop-color="#d8b4fe"/>
+              <stop offset="100%" stop-color="#9333ea"/>
+            </linearGradient>
+            <linearGradient id="airCore" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="60%" stop-color="#f0f9ff"/>
+              <stop offset="100%" stop-color="#e9d5ff"/>
+            </linearGradient>
+          </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#airAura)"/>
+          <path d="M12 36 Q26 24 38 33" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+          <path d="M62 67 Q74 76 88 64" fill="none" stroke="#f3e8ff" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+          <polygon points="50,6 84,50 50,94 16,50" fill="url(#airGem)" stroke="#ffffff" stroke-width="2.8" stroke-linejoin="round"/>
+          <polygon points="50,6 84,50 64,50" fill="#e0f2fe" opacity="0.85"/>
+          <polygon points="50,6 16,50 36,50" fill="#ffffff" opacity="0.95"/>
+          <polygon points="16,50 36,50 50,94" fill="#93c5fd" opacity="0.75"/>
+          <polygon points="84,50 50,94 64,50" fill="#a855f7" opacity="0.65"/>
+          <polygon points="50,24 64,50 50,76 36,50" fill="url(#airCore)" stroke="#ffffff" stroke-width="1.4"/>
+          <polygon points="50,29 53,47 63,50 53,53 50,71 47,53 37,50 47,47" fill="#ffffff"/>
+          <circle cx="76" cy="22" r="2.8" fill="#ffffff"/>
+          <circle cx="24" cy="78" r="2.5" fill="#f3e8ff"/>
+        </svg>`
+      }
+    ];
+
+    const CONFIG_PIN = "0402";
+
+    // BANC DE 12 PREGUNTES PER DEFECTE SOBRE LA DIRECCIÓ DEL SO (PUJA, IGUAL, BAIXA)
+    const defaultState = {
+  "p1aName": "Vaiana",
+  "p1aImg": "https://static.wixstatic.com/media/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png/v1/fill/w_196,h_264,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png",
+  "p1bName": "Maui",
+  "p1bImg": "https://static.wixstatic.com/media/a6e1f9_2b22400f6c0f4fc9937688fd958c0bbd~mv2.png/v1/fill/w_216,h_254,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/a6e1f9_2b22400f6c0f4fc9937688fd958c0bbd~mv2.png",
+  "bgImg": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80",
+  "timerSeconds": 15,
+  "questions": [
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    }
+  ]
+};
+
+    let state = {
+  "p1aName": "Vaiana",
+  "p1aImg": "https://static.wixstatic.com/media/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png/v1/fill/w_196,h_264,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/a6e1f9_f840eeec19d04823bb21a32952e61267~mv2.png",
+  "p1bName": "Maui",
+  "p1bImg": "https://static.wixstatic.com/media/a6e1f9_2b22400f6c0f4fc9937688fd958c0bbd~mv2.png/v1/fill/w_216,h_254,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/a6e1f9_2b22400f6c0f4fc9937688fd958c0bbd~mv2.png",
+  "bgImg": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1200&q=80",
+  "timerSeconds": 15,
+  "questions": [
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "puja",
+      "synthPreset": "scale_up",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Puja.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "baixa",
+      "synthPreset": "scale_down",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Baixa.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    },
+    {
+      "q": "Cap a on va aquest so?",
+      "direction": "igual",
+      "synthPreset": "same_mid",
+      "img": "",
+      "audio": "https://file.garden/avDAN2VFP-A3veBw/Puja%2C%20igual%2C%20baixa/Igual.mp3"
+    }
+  ]
+};
+    if (!state.timerSeconds) state.timerSeconds = 15;
+    let unlockedGems = [];
+
+    let selectedGemId = null;
+    let selectedPlayerOption = 1;
+    let selectedPlayerName = state.p1aName;
+    let selectedPlayerImg = state.p1aImg;
+    let useTimer = false;
+    let questionTimerInterval = null;
+    let timerTimeLeft = 0;
+    let celebrationMusicInterval = null;
+    let celebrationConfettiInterval = null;
+
+    const MOUNTAIN_PATH = [
+      { x: 16.0, y: 90.8 },
+      { x: 34.0, y: 82.5 },
+      { x: 52.0, y: 74.2 },
+      { x: 35.0, y: 65.8 },
+      { x: 44.0, y: 57.5 },
+      { x: 62.0, y: 49.2 },
+      { x: 49.0, y: 41.7 },
+      { x: 56.0, y: 34.2 },
+      { x: 68.0, y: 27.5 },
+      { x: 62.0, y: 21.7 },
+      { x: 65.0, y: 15.0 }
+    ];
+
+    const TOTAL_STEPS = 10;
+    let currentStep = 0;
+    let currentQIndex = 0;
+    let openedFromStartScreen = false;
+    let isProcessingAnswer = false;
+
+    let countCorrect = 0;
+    let countWrong = 0;
+    let matchStartTime = 0;
+
+    function checkPinAndOpenConfig() {
+      openedFromStartScreen = false;
+      showPinModal();
+    }
+
+    function openConfigFromStart() {
+      openedFromStartScreen = true;
+      showPinModal();
+    }
+
+    function showPinModal() {
+      document.getElementById('pin-input').value = '';
+      document.getElementById('pin-error').style.display = 'none';
+      document.getElementById('pin-modal').style.display = 'flex';
+      setTimeout(() => document.getElementById('pin-input').focus(), 100);
+    }
+
+    function closePinModal() {
+      document.getElementById('pin-modal').style.display = 'none';
+    }
+
+    function verifyPin() {
+      const input = document.getElementById('pin-input').value.trim();
+      if (input === CONFIG_PIN) {
+        closePinModal();
+        openConfig();
+      } else {
+        document.getElementById('pin-error').style.display = 'block';
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-input').focus();
+      }
+    }
+
+    function initPathNodes() {
+      const container = document.getElementById('mountain-container');
+      const existingSteps = container.querySelectorAll('.path-node');
+      existingSteps.forEach(n => n.remove());
+
+      MOUNTAIN_PATH.forEach((pt, i) => {
+        const node = document.createElement('div');
+        node.className = 'path-node' + (i === TOTAL_STEPS ? ' summit-node' : '');
+        node.id = `path-node-${i}`;
+        node.innerText = i === TOTAL_STEPS ? '🚩' : i;
+        node.style.left = `${pt.x}%`;
+        node.style.top = `${pt.y}%`;
+        container.appendChild(node);
+      });
+
+      const summit = MOUNTAIN_PATH[TOTAL_STEPS];
+      const stageGem = document.getElementById('stage-gem-target');
+      stageGem.style.left = `${summit.x}%`;
+      stageGem.style.top = `${summit.y - 7.5}%`;
+    }
+
+    function triggerWinConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 110,
+          spread: 75,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function startContinuousCelebrationConfetti() {
+      stopContinuousCelebrationConfetti();
+      triggerWinConfetti();
+      if (typeof confetti === 'function') {
+        celebrationConfettiInterval = setInterval(() => {
+          confetti({
+            particleCount: 35,
+            angle: 60,
+            spread: 65,
+            origin: { x: 0.05, y: 0.65 },
+            zIndex: 350,
+            colors: ['#ffcc00', '#22c55e', '#38bdf8', '#ef4444', '#a855f7']
+          });
+          confetti({
+            particleCount: 35,
+            angle: 120,
+            spread: 65,
+            origin: { x: 0.95, y: 0.65 },
+            zIndex: 350,
+            colors: ['#ffcc00', '#22c55e', '#38bdf8', '#ef4444', '#a855f7']
+          });
+        }, 950);
+      }
+    }
+
+    function stopContinuousCelebrationConfetti() {
+      if (celebrationConfettiInterval) {
+        clearInterval(celebrationConfettiInterval);
+        celebrationConfettiInterval = null;
+      }
+    }
+
+    function triggerAllGemsSuperCelebration() {
+      if (typeof confetti === 'function') {
+        const duration = 12 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 35, spread: 360, ticks: 80, zIndex: 400 };
+
+        function randomInRange(min, max) {
+          return Math.random() * (max - min) + min;
+        }
+
+        const interval = setInterval(function() {
+          const timeLeft = animationEnd - Date.now();
+          if (timeLeft <= 0) return clearInterval(interval);
+          const particleCount = 60 * (timeLeft / duration);
+          confetti(Object.assign({}, defaults, { 
+            particleCount, 
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+            colors: ['#ffcc00', '#22c55e', '#38bdf8', '#ef4444', '#ec4899', '#a855f7']
+          }));
+          confetti(Object.assign({}, defaults, { 
+            particleCount, 
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+            colors: ['#ffcc00', '#22c55e', '#38bdf8', '#ef4444', '#ec4899', '#a855f7']
+          }));
+        }, 200);
+      }
+    }
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // SÍNTESI DE MELODIES PER A DIRECCIÓ DEL SO (PUJA, IGUAL, BAIXA)
+    function playSynthesizedDirectionSound(direction, preset) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+      const dir = (direction || 'puja').toLowerCase();
+
+      let freqs = [];
+      let waveType = 'triangle';
+
+      if (dir === 'puja') {
+        if (preset === 'arpeggio_up') {
+          freqs = [261.63, 329.63, 392.00, 523.25];
+          waveType = 'sine';
+        } else if (preset === 'step_up') {
+          freqs = [293.66, 329.63, 369.99, 440.00];
+          waveType = 'triangle';
+        } else {
+          freqs = [261.63, 329.63, 392.00, 523.25];
+          waveType = 'triangle';
+        }
+      } else if (dir === 'igual') {
+        if (preset === 'same_high') {
+          freqs = [523.25, 523.25, 523.25, 523.25];
+          waveType = 'sine';
+        } else if (preset === 'same_low') {
+          freqs = [261.63, 261.63, 261.63, 261.63];
+          waveType = 'triangle';
+        } else {
+          freqs = [392.00, 392.00, 392.00, 392.00];
+          waveType = 'triangle';
+        }
+      } else {
+        if (preset === 'arpeggio_down') {
+          freqs = [523.25, 392.00, 329.63, 261.63];
+          waveType = 'sine';
+        } else if (preset === 'step_down') {
+          freqs = [440.00, 369.99, 329.63, 293.66];
+          waveType = 'triangle';
+        } else {
+          freqs = [523.25, 392.00, 329.63, 261.63];
+          waveType = 'triangle';
+        }
+      }
+
+      freqs.forEach((f, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = waveType;
+        const t = now + i * 0.34;
+        osc.frequency.setValueAtTime(f, t);
+
+        gain.gain.setValueAtTime(0.01, t);
+        gain.gain.linearRampToValueAtTime(0.32, t + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.30);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.32);
+      });
+    }
+
+    function playSound(type) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      if (type === 'step') {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(640, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'step-back') {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'gem-collect') {
+        const now = audioCtx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+        notes.forEach((freq, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          const noteTime = now + (idx * 0.08);
+          osc.frequency.setValueAtTime(freq, noteTime);
+          gain.gain.setValueAtTime(0.2, noteTime);
+          gain.gain.linearRampToValueAtTime(0.01, noteTime + 0.4);
+          osc.start(noteTime);
+          osc.stop(noteTime + 0.4);
+        });
+      } else if (type === 'win') {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(554.37, now + 0.15);
+        osc.frequency.setValueAtTime(659.25, now + 0.30);
+        osc.frequency.setValueAtTime(880, now + 0.45);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      }
+    }
+
+    function startFestiveCelebrationMusic() {
+      stopFestiveCelebrationMusic();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const melody = [
+        { f: 523.25, d: 0.2 }, { f: 659.25, d: 0.2 }, { f: 783.99, d: 0.2 }, { f: 1046.50, d: 0.4 },
+        { f: 880.00, d: 0.2 }, { f: 1046.50, d: 0.6 },
+        { f: 698.46, d: 0.2 }, { f: 880.00, d: 0.2 }, { f: 1046.50, d: 0.2 }, { f: 1318.51, d: 0.4 },
+        { f: 1174.66, d: 0.2 }, { f: 1318.51, d: 0.6 }
+      ];
+
+      let step = 0;
+      celebrationMusicInterval = setInterval(() => {
+        const note = melody[step % melody.length];
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = (step % 2 === 0) ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(note.f, now);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + note.d);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + note.d);
+
+        step++;
+      }, 240);
+    }
+
+    function stopFestiveCelebrationMusic() {
+      if (celebrationMusicInterval) {
+        clearInterval(celebrationMusicInterval);
+        celebrationMusicInterval = null;
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('lang-screen').style.display !== 'flex') {
+        exitToStartScreen();
+      }
+    });
+
+    function renderGemsTracker() {
+      const container = document.getElementById('gems-tracker-grid');
+      if (!container) return;
+      container.innerHTML = '';
+      GEM_TYPES.forEach(gem => {
+        const isUnlocked = unlockedGems.includes(gem.id);
+        const item = document.createElement('div');
+        item.className = `gem-item ${isUnlocked ? 'unlocked' : ''}`;
+        item.innerHTML = `
+          <div class="gem-icon">${gem.svg}</div>
+          <div class="gem-name">${getGemName(gem.id)}</div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderHudGems() {
+      const hudBar = document.getElementById('hud-gems-bar');
+      if (!hudBar) return;
+      hudBar.innerHTML = '';
+      GEM_TYPES.forEach(gem => {
+        const slot = document.createElement('div');
+        const isUnlocked = unlockedGems.includes(gem.id);
+        const isCurrentTarget = gem.id === selectedGemId;
+        slot.className = 'hud-gem-slot';
+        if (isUnlocked) slot.classList.add('unlocked');
+        else if (isCurrentTarget) slot.classList.add('current-target');
+        slot.title = `${getGemName(gem.id)}: ${isUnlocked ? t('statusUnlocked') : (isCurrentTarget ? t('statusInProgress') : t('statusPending'))}`;
+        slot.innerHTML = gem.svg;
+        hudBar.appendChild(slot);
+      });
+    }
+
+    function askResetGemsProgress() {
+      document.getElementById('reset-confirm-modal').style.display = 'flex';
+    }
+
+    function closeResetConfirmModal() {
+      document.getElementById('reset-confirm-modal').style.display = 'none';
+    }
+
+    function confirmResetGemsProgress() {
+      unlockedGems = [];
+      localStorage.setItem('direccio_so_infantil_gems', JSON.stringify(unlockedGems));
+      renderGemsTracker();
+      renderHudGems();
+      closeResetConfirmModal();
+    }
+
+    function applyVisuals() {
+      document.getElementById('hud-avatar').style.backgroundImage = `url('${selectedPlayerImg}')`;
+      document.getElementById('char-p1').style.backgroundImage = `url('${selectedPlayerImg}')`;
+      document.getElementById('game-container').style.backgroundImage = `url('${state.bgImg}')`;
+      const activeGem = GEM_TYPES.find(g => g.id === selectedGemId) || GEM_TYPES[0];
+      document.getElementById('hud-gem-target').innerHTML = activeGem.svg;
+      const stageGem = document.getElementById('stage-gem-target');
+      stageGem.innerHTML = activeGem.svg;
+      stageGem.classList.remove('gem-collect-glow');
+      renderHudGems();
+    }
+
+    function spawnFloatingText(text, color) {
+      const el = document.createElement('div');
+      el.className = 'floating-text';
+      el.innerText = text;
+      el.style.color = color;
+      el.style.left = '42%';
+      document.getElementById('stage-area').appendChild(el);
+      setTimeout(() => el.remove(), 1800);
+    }
+
+    function openCharSelect(enableTimer) {
+      useTimer = !!enableTimer;
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('btn-exit-game').style.display = 'block';
+
+      const gemContainer = document.getElementById('gem-select-container');
+      gemContainer.innerHTML = '';
+      let firstAvailableGem = null;
+
+      GEM_TYPES.forEach(gem => {
+        const isUnlocked = unlockedGems.includes(gem.id);
+        const card = document.createElement('div');
+        card.className = `gem-select-card ${isUnlocked ? 'already-unlocked' : ''}`;
+        card.innerHTML = `
+          <div style="width: 58px; height: 58px; display: flex; align-items: center; justify-content: center;">${gem.svg}</div>
+          <div style="font-size: 0.85rem; color: #fff; font-weight: bold;">${getGemName(gem.id)}</div>
+          <div style="font-size: 0.7rem; color: ${isUnlocked ? '#22c55e' : '#ffcc00'}; font-weight: bold;">
+            ${isUnlocked ? t('unlockedBadge') : t('lockedBadge')}
+          </div>
+        `;
+        if (!isUnlocked && !firstAvailableGem) firstAvailableGem = gem.id;
+        if (!isUnlocked) card.onclick = () => selectGem(gem.id);
+        gemContainer.appendChild(card);
+      });
+
+      selectedGemId = firstAvailableGem || GEM_TYPES[0].id;
+      highlightSelectedGem();
+
+      document.getElementById('select-name-p1a').innerText = state.p1aName;
+      document.getElementById('select-avatar-p1a').style.backgroundImage = `url('${state.p1aImg}')`;
+      document.getElementById('select-name-p1b').innerText = state.p1bName;
+      document.getElementById('select-avatar-p1b').style.backgroundImage = `url('${state.p1bImg}')`;
+
+      selectFighter(1);
+      document.getElementById('char-select-screen').style.display = 'flex';
+    }
+
+    function selectGem(gemId) {
+      selectedGemId = gemId;
+      highlightSelectedGem();
+    }
+
+    function highlightSelectedGem() {
+      const cards = document.querySelectorAll('.gem-select-card');
+      GEM_TYPES.forEach((gem, idx) => {
+        if (cards[idx]) {
+          if (gem.id === selectedGemId) cards[idx].classList.add('selected');
+          else cards[idx].classList.remove('selected');
+        }
+      });
+    }
+
+    function selectFighter(option) {
+      selectedPlayerOption = option;
+      if (option === 1) {
+        selectedPlayerName = state.p1aName;
+        selectedPlayerImg = state.p1aImg;
+        document.getElementById('card-p1a').classList.add('selected');
+        document.getElementById('card-p1b').classList.remove('selected');
+      } else {
+        selectedPlayerName = state.p1bName;
+        selectedPlayerImg = state.p1bImg;
+        document.getElementById('card-p1b').classList.add('selected');
+        document.getElementById('card-p1a').classList.remove('selected');
+      }
+    }
+
+    function confirmSelectionAndStart() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      document.getElementById('char-select-screen').style.display = 'none';
+      startGame();
+    }
+
+    function startGame() {
+      document.getElementById('btn-main-config').style.display = 'none';
+      document.getElementById('btn-exit-game').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'none';
+      document.getElementById('single-gem-celebration-screen').style.display = 'none';
+      document.getElementById('grand-celebration-screen').style.display = 'none';
+      stopFestiveCelebrationMusic();
+      stopContinuousCelebrationConfetti();
+      
+      initPathNodes();
+      applyVisuals();
+
+      currentStep = 0;
+      countCorrect = 0;
+      countWrong = 0;
+      matchStartTime = Date.now();
+      
+      updateProgressVisuals();
+
+      state.questions.sort(() => Math.random() - 0.5);
+      currentQIndex = 0;
+
+      showQuestion();
+    }
+
+    function stopQuizAudio() {
+      const audioPlayer = document.getElementById('quiz-audio-player');
+      audioPlayer.pause();
+      audioPlayer.currentTime = 0;
+      audioPlayer.src = "";
+    }
+
+    function stopQuestionTimer() {
+      if (questionTimerInterval) {
+        clearInterval(questionTimerInterval);
+        questionTimerInterval = null;
+      }
+    }
+
+    function startQuestionTimer() {
+      stopQuestionTimer();
+      const timerContainer = document.getElementById('quiz-timer-container');
+      const timerBar = document.getElementById('quiz-timer-bar');
+      const timerText = document.getElementById('quiz-timer-text');
+
+      if (!useTimer) {
+        timerContainer.style.display = 'none';
+        return;
+      }
+
+      timerContainer.style.display = 'block';
+      const maxSeconds = state.timerSeconds || 15;
+      timerTimeLeft = maxSeconds;
+      timerBar.style.width = '100%';
+      timerText.innerText = `${timerTimeLeft}s`;
+
+      const startTime = Date.now();
+      const durationMs = maxSeconds * 1000;
+
+      questionTimerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, durationMs - elapsed);
+        const percent = (remaining / durationMs) * 100;
+        const secondsLeft = Math.ceil(remaining / 1000);
+
+        timerBar.style.width = percent + '%';
+        timerText.innerText = `${secondsLeft}s`;
+
+        if (remaining <= 0) {
+          stopQuestionTimer();
+          if (!isProcessingAnswer) {
+            selectDirectionAnswer(null, true);
+          }
+        }
+      }, 100);
+    }
+
+    function exitToStartScreen() {
+      stopQuestionTimer();
+      stopQuizAudio();
+      stopFestiveCelebrationMusic();
+      stopContinuousCelebrationConfetti();
+      document.getElementById('quiz-modal').style.display = 'none';
+      document.getElementById('config-modal').style.display = 'none';
+      document.getElementById('pin-modal').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'none';
+      document.getElementById('single-gem-celebration-screen').style.display = 'none';
+      document.getElementById('char-select-screen').style.display = 'none';
+      document.getElementById('grand-celebration-screen').style.display = 'none';
+      
+      renderGemsTracker();
+      document.getElementById('start-screen').style.display = 'flex';
+      document.getElementById('btn-main-config').style.display = 'block';
+      document.getElementById('btn-exit-game').style.display = 'block';
+    }
+
+    function updateProgressVisuals() {
+      const percentage = (currentStep / TOTAL_STEPS) * 100;
+      document.getElementById('progress-bar').style.width = percentage + '%';
+      document.getElementById('progress-text').innerText = `${t('stepLabel')} ${currentStep} / ${TOTAL_STEPS}`;
+
+      const runner = document.getElementById('char-p1');
+      const pt = MOUNTAIN_PATH[currentStep] || MOUNTAIN_PATH[0];
+      
+      runner.style.left = `${pt.x}%`;
+      runner.style.top = `${pt.y}%`;
+
+      for (let i = 0; i <= TOTAL_STEPS; i++) {
+        const node = document.getElementById(`path-node-${i}`);
+        if (node) {
+          if (i <= currentStep) node.classList.add('reached');
+          else node.classList.remove('reached');
+        }
+      }
+    }
+
+    function playCurrentQuestionAudio() {
+      const qData = state.questions[currentQIndex];
+      if (!qData) return;
+
+      const audioPlayer = document.getElementById('quiz-audio-player');
+      const statusText = document.getElementById('audio-status-text');
+
+      if (qData.audio && qData.audio.trim() !== "") {
+        audioPlayer.style.display = 'block';
+        audioPlayer.src = qData.audio;
+        audioPlayer.currentTime = 0;
+        statusText.innerText = t('audioPlaying');
+        const playPromise = audioPlayer.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            statusText.innerText = t('audioTapReplay');
+          });
+        }
+      } else {
+        audioPlayer.style.display = 'none';
+        audioPlayer.src = "";
+        statusText.innerText = t('audioListenNotes');
+        playSynthesizedDirectionSound(qData.direction || 'puja', qData.synthPreset || 'scale_up');
+      }
+    }
+
+    function replayCurrentQuestionAudio() {
+      playCurrentQuestionAudio();
+    }
+
+    function showQuestion() {
+      if (currentStep >= TOTAL_STEPS) return;
+
+      isProcessingAnswer = false;
+      document.getElementById('feedback-msg').style.display = 'none';
+
+      const btnPuja = document.getElementById('btn-choice-puja');
+      const btnIgual = document.getElementById('btn-choice-igual');
+      const btnBaixa = document.getElementById('btn-choice-baixa');
+
+      btnPuja.classList.remove('correct-feedback', 'wrong-feedback');
+      btnIgual.classList.remove('correct-feedback', 'wrong-feedback');
+      btnBaixa.classList.remove('correct-feedback', 'wrong-feedback');
+
+      if (currentQIndex >= state.questions.length) {
+        state.questions.sort(() => Math.random() - 0.5);
+        currentQIndex = 0;
+      }
+
+      const qData = state.questions[currentQIndex];
+      document.getElementById('quiz-question').innerText = getLocalizedQuestionText(qData);
+
+      const imgContainer = document.getElementById('quiz-img-container');
+      const imgEl = document.getElementById('quiz-image');
+      if (qData.img && qData.img.trim() !== "") {
+        imgEl.src = qData.img;
+        imgContainer.style.display = 'flex';
+      } else {
+        imgContainer.style.display = 'none';
+        imgEl.src = "";
+      }
+
+      document.getElementById('quiz-modal').style.display = 'flex';
+
+      setTimeout(() => {
+        playCurrentQuestionAudio();
+      }, 250);
+
+      startQuestionTimer();
+    }
+
+    function selectDirectionAnswer(chosenDirection, isTimeout = false) {
+      if (isProcessingAnswer) return;
+      isProcessingAnswer = true;
+      stopQuestionTimer();
+      stopQuizAudio();
+
+      const runner = document.getElementById('char-p1');
+      const qData = state.questions[currentQIndex];
+      const correctDirection = (qData.direction || 'puja').toLowerCase();
+      const isCorrect = !isTimeout && (chosenDirection === correctDirection);
+
+      const btnMap = {
+        puja: document.getElementById('btn-choice-puja'),
+        igual: document.getElementById('btn-choice-igual'),
+        baixa: document.getElementById('btn-choice-baixa')
+      };
+
+      if (btnMap[correctDirection]) {
+        btnMap[correctDirection].classList.add('correct-feedback');
+      }
+      if (!isCorrect && chosenDirection && btnMap[chosenDirection]) {
+        btnMap[chosenDirection].classList.add('wrong-feedback');
+      }
+
+      if (!isCorrect) {
+        const feedbackEl = document.getElementById('feedback-msg');
+        let msg = t('msgTimeout');
+        if (!isTimeout) {
+          if (correctDirection === 'puja') msg = t('msgPuja');
+          else if (correctDirection === 'igual') msg = t('msgIgual');
+          else msg = t('msgBaixa');
+        }
+        feedbackEl.innerText = msg;
+        feedbackEl.style.display = 'block';
+      }
+
+      setTimeout(() => {
+        document.getElementById('quiz-modal').style.display = 'none';
+
+        if (isCorrect) {
+          countCorrect++;
+          currentStep = Math.min(TOTAL_STEPS, currentStep + 1);
+          
+          playSound('step');
+          runner.classList.remove('jump-walk', 'shake-red');
+          void runner.offsetWidth;
+          runner.classList.add('jump-walk');
+
+          spawnFloatingText(t('floatCorrect'), '#22c55e');
+          updateProgressVisuals();
+
+          setTimeout(() => {
+            runner.classList.remove('jump-walk');
+            checkEndOrNext();
+          }, 900);
+
+        } else {
+          countWrong++;
+          currentStep = Math.max(0, currentStep - 1);
+
+          playSound('step-back');
+          runner.classList.remove('jump-walk', 'shake-red');
+          void runner.offsetWidth;
+          runner.classList.add('shake-red');
+
+          spawnFloatingText(isTimeout ? t('floatTimeout') : t('floatWrong'), '#ef4444');
+          updateProgressVisuals();
+
+          setTimeout(() => {
+            runner.classList.remove('shake-red');
+            checkEndOrNext();
+          }, 900);
+        }
+      }, isCorrect ? 950 : 1650);
+    }
+
+    function checkEndOrNext() {
+      if (currentStep >= TOTAL_STEPS) {
+        const stageGem = document.getElementById('stage-gem-target');
+        const runner = document.getElementById('char-p1');
+
+        playSound('gem-collect');
+        stageGem.classList.add('gem-collect-glow');
+        runner.classList.add('jump-walk');
+
+        setTimeout(() => {
+          playSound('win');
+          showSingleGemCelebration();
+        }, 1400);
+      } else {
+        currentQIndex++;
+        setTimeout(showQuestion, 1300);
+      }
+    }
+
+    function showSingleGemCelebration() {
+      document.getElementById('btn-exit-game').style.display = 'block';
+      const activeGem = GEM_TYPES.find(g => g.id === selectedGemId) || GEM_TYPES[0];
+      const gemName = getGemName(activeGem.id);
+
+      if (!unlockedGems.includes(selectedGemId)) {
+        unlockedGems.push(selectedGemId);
+        localStorage.setItem('direccio_so_infantil_gems', JSON.stringify(unlockedGems));
+      }
+
+      document.getElementById('single-celebration-title').innerText = t('singleCelTitle', selectedPlayerName);
+      document.getElementById('single-celebration-subtitle').innerText = t('singleCelSub', gemName);
+      document.getElementById('single-cel-char-avatar').style.backgroundImage = `url('${selectedPlayerImg}')`;
+      document.getElementById('single-cel-gem-icon').innerHTML = activeGem.svg;
+
+      document.getElementById('single-gem-celebration-screen').style.display = 'flex';
+      startFestiveCelebrationMusic();
+      startContinuousCelebrationConfetti();
+    }
+
+    function proceedAfterSingleCelebration() {
+      stopFestiveCelebrationMusic();
+      stopContinuousCelebrationConfetti();
+      document.getElementById('single-gem-celebration-screen').style.display = 'none';
+
+      if (unlockedGems.length === 4) {
+        showGrandCelebrationScreen();
+      } else {
+        showFinalResults(true);
+      }
+    }
+
+    function showGrandCelebrationScreen() {
+      document.getElementById('single-gem-celebration-screen').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'none';
+      
+      document.getElementById('celebration-hero-name').innerText = t('grandCelSub', selectedPlayerName);
+      document.getElementById('celebration-hero-avatar').style.backgroundImage = `url('${selectedPlayerImg}')`;
+
+      const celebBar = document.getElementById('celebration-gems-bar');
+      if (celebBar) {
+        celebBar.innerHTML = GEM_TYPES.map(g => `<div class="celebration-gem-badge" title="${getGemName(g.id)}">${g.svg}</div>`).join('');
+      }
+      
+      document.getElementById('grand-celebration-screen').style.display = 'flex';
+
+      startFestiveCelebrationMusic();
+      triggerAllGemsSuperCelebration();
+    }
+
+    function showFinalResults(isWin) {
+      document.getElementById('btn-exit-game').style.display = 'block';
+      const titleEl = document.getElementById('results-title');
+      const bannerEl = document.getElementById('gem-unlocked-banner');
+      const totalTime = Math.round((Date.now() - matchStartTime) / 1000);
+      const totalQuestions = countCorrect + countWrong;
+      const accuracy = totalQuestions > 0 ? Math.round((countCorrect / totalQuestions) * 100) : 0;
+
+      const activeGem = GEM_TYPES.find(g => g.id === selectedGemId) || GEM_TYPES[0];
+      const gemName = getGemName(activeGem.id);
+
+      if (isWin) {
+        titleEl.innerText = t('resultsWinTitle', selectedPlayerName);
+        titleEl.className = 'results-title win';
+        
+        document.getElementById('banner-gem-icon').innerHTML = activeGem.svg;
+        document.getElementById('banner-gem-text').innerText = t('bannerGemText', gemName, unlockedGems.length);
+        bannerEl.style.display = 'flex';
+      } else {
+        titleEl.innerText = t('resultsLoseTitle');
+        titleEl.className = 'results-title lose';
+        bannerEl.style.display = 'none';
+      }
+
+      document.getElementById('stat-correct').innerText = countCorrect;
+      document.getElementById('stat-wrong').innerText = countWrong;
+      document.getElementById('stat-accuracy').innerText = `${accuracy}%`;
+      document.getElementById('stat-time').innerText = `${totalTime}s`;
+
+      document.getElementById('results-screen').style.display = 'flex';
+    }
+
+    function switchTab(tabIdx) {
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === tabIdx - 1);
+      });
+      document.querySelectorAll('.tab-content').forEach((content, idx) => {
+        content.classList.toggle('active', idx === tabIdx - 1);
+      });
+    }
+
+    function showConfigBanner(msg, isError = false) {
+      const banner = document.getElementById('config-status-banner');
+      if (!banner) return;
+      banner.style.display = 'block';
+      banner.style.background = isError ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)';
+      banner.style.border = isError ? '1px solid #ef4444' : '1px solid #22c55e';
+      banner.style.color = isError ? '#fca5a5' : '#86efac';
+      banner.innerText = msg;
+      setTimeout(() => { banner.style.display = 'none'; }, 4000);
+    }
+
+    function openConfig() {
+      stopQuestionTimer();
+      stopQuizAudio();
+      stopFestiveCelebrationMusic();
+      document.getElementById('quiz-modal').style.display = 'none';
+
+      document.getElementById('cfg-name-p1a').value = state.p1aName;
+      document.getElementById('cfg-img-p1a').value = state.p1aImg;
+      document.getElementById('cfg-name-p1b').value = state.p1bName;
+      document.getElementById('cfg-img-p1b').value = state.p1bImg;
+      document.getElementById('cfg-bg-img').value = state.bgImg;
+      document.getElementById('cfg-timer-seconds').value = state.timerSeconds || 15;
+
+      switchTab(1);
+      resetQuestionForm();
+      renderQuestionsList();
+      document.getElementById('config-modal').style.display = 'flex';
+    }
+
+    function closeConfig() {
+      document.getElementById('config-modal').style.display = 'none';
+      if (openedFromStartScreen) {
+        openedFromStartScreen = false;
+        document.getElementById('start-screen').style.display = 'flex';
+      } else if (document.getElementById('start-screen').style.display !== 'flex') {
+        showQuestion();
+      }
+    }
+
+    function exportConfigJson() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "direccio_del_so_config.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function exportAppHtml() {
+      const currentFullState = {
+        p1aName: document.getElementById('cfg-name-p1a').value.trim() || state.p1aName,
+        p1aImg: document.getElementById('cfg-img-p1a').value.trim() || state.p1aImg,
+        p1bName: document.getElementById('cfg-name-p1b').value.trim() || state.p1bName,
+        p1bImg: document.getElementById('cfg-img-p1b').value.trim() || state.p1bImg,
+        bgImg: document.getElementById('cfg-bg-img').value.trim() || state.bgImg,
+        timerSeconds: parseInt(document.getElementById('cfg-timer-seconds').value) || 15,
+        questions: state.questions
+      };
+
+      let htmlSource = document.documentElement.outerHTML;
+
+      const stateJson = JSON.stringify(currentFullState, null, 2);
+      const gemsJson = JSON.stringify(unlockedGems, null, 2);
+
+      htmlSource = htmlSource.replace(
+        /const defaultState = \{[\s\S]*?\};/,
+        `const defaultState = ${stateJson};`
+      );
+
+      htmlSource = htmlSource.replace(
+        /let state = JSON\.parse\(localStorage\.getItem\('direccio_so_infantil_cfg'\)\) \|\| JSON\.parse\(JSON\.stringify\(defaultState\)\);/,
+        `let state = ${stateJson};`
+      );
+
+      htmlSource = htmlSource.replace(
+        /let unlockedGems = JSON\.parse\(localStorage\.getItem\('direccio_so_infantil_gems'\)\) \|\| \[\];/,
+        `let unlockedGems = ${gemsJson};`
+      );
+
+      const blob = new Blob([htmlSource], { type: 'text/html;charset=utf-8' });
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = URL.createObjectURL(blob);
+      downloadAnchor.download = "DireccioDelSo_Infantil_AmbDades.html";
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importConfigJson(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported && imported.questions) {
+            state = imported;
+            if (!state.timerSeconds) state.timerSeconds = 15;
+            localStorage.setItem('direccio_so_infantil_cfg', JSON.stringify(state));
+            applyVisuals();
+            openConfig();
+            showConfigBanner(t('cfgJsonOk'), false);
+          } else {
+            showConfigBanner(t('cfgJsonInvalid'), true);
+          }
+        } catch (err) {
+          showConfigBanner(t('cfgJsonErr'), true);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function uploadImg(event, targetId) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById(targetId).value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function uploadAudio(event, targetId) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById(targetId).value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function renderQuestionsList() {
+      const container = document.getElementById('questions-list');
+      container.innerHTML = '';
+      
+      if (state.questions.length === 0) {
+        container.innerHTML = `<p style="color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px;">${t('cfgNoSounds')}</p>`;
+        return;
+      }
+
+      state.questions.forEach((q, idx) => {
+        const hasImg = q.img && q.img.trim() !== "";
+        const hasAudio = q.audio && q.audio.trim() !== "";
+        const dir = (q.direction || 'puja').toLowerCase();
+        const dirLabel = dir === 'baixa' ? `↘️ ${t('choiceBaixa').toUpperCase()}` : (dir === 'igual' ? `➡️ ${t('choiceIgual').toUpperCase()}` : `↗️ ${t('choicePuja').toUpperCase()}`);
+        const qDisplay = getLocalizedQuestionText(q);
+        
+        const div = document.createElement('div');
+        div.className = 'q-item';
+        div.innerHTML = `
+          <div class="q-item-info">
+            <span style="color: #fff; font-size: 0.95rem;"><b>#${idx + 1}</b> - ${qDisplay}</span>
+            <div style="display: flex; gap: 8px; font-size: 0.8rem; flex-wrap: wrap;">
+              <span style="color: #ffcc00; font-weight: bold;">${dirLabel}</span>
+              <span style="color: #38bdf8;">${hasAudio ? t('tagCustomAudio') : t('tagAutoAudio')}</span>
+              ${hasImg ? `<span style="color: #22c55e;">${t('tagWithImg')}</span>` : ''}
+            </div>
+          </div>
+          <div class="q-item-actions">
+            <button class="btn-edit-q" onclick="editQuestion(${idx})">${t('btnEdit')}</button>
+            <button class="btn-delete-q" onclick="removeQuestion(${idx})">${t('btnDelete')}</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function editQuestion(idx) {
+      const q = state.questions[idx];
+      if (!q) return;
+
+      document.getElementById('editing-q-index').value = idx;
+      document.getElementById('form-q-title').innerText = t('cfgFormEditTitle', idx + 1);
+      document.getElementById('new-q-text').value = getLocalizedQuestionText(q);
+      document.getElementById('new-q-direction').value = q.direction || 'puja';
+      document.getElementById('new-q-audio').value = q.audio || '';
+      document.getElementById('new-q-img').value = q.img || '';
+
+      document.getElementById('btn-save-question').innerText = t('btnSaveEdit');
+      document.getElementById('btn-cancel-edit').style.display = 'block';
+
+      document.getElementById('form-q-title').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetQuestionForm() {
+      document.getElementById('editing-q-index').value = "-1";
+      document.getElementById('form-q-title').innerText = t('cfgFormAddTitle');
+      document.getElementById('new-q-text').value = t('defaultQuestion');
+      document.getElementById('new-q-direction').value = 'puja';
+      document.getElementById('new-q-audio').value = '';
+      document.getElementById('new-q-img').value = '';
+
+      document.getElementById('btn-save-question').innerText = t('btnAddSound');
+      document.getElementById('btn-cancel-edit').style.display = 'none';
+    }
+
+    function getPresetForDirection(dir) {
+      if (dir === 'baixa') return 'scale_down';
+      if (dir === 'igual') return 'same_mid';
+      return 'scale_up';
+    }
+
+    function addOrUpdateQuestion() {
+      const editIndex = parseInt(document.getElementById('editing-q-index').value);
+      const qText = document.getElementById('new-q-text').value.trim() || t('defaultQuestion');
+      const qDirection = document.getElementById('new-q-direction').value || "puja";
+      const qAudio = document.getElementById('new-q-audio').value.trim();
+      const qImg = document.getElementById('new-q-img').value.trim();
+
+      const questionData = {
+        q: qText,
+        direction: qDirection,
+        synthPreset: getPresetForDirection(qDirection),
+        img: qImg,
+        audio: qAudio
+      };
+
+      if (editIndex >= 0 && editIndex < state.questions.length) {
+        state.questions[editIndex] = questionData;
+      } else {
+        state.questions.push(questionData);
+      }
+
+      resetQuestionForm();
+      renderQuestionsList();
+    }
+
+    function importBulkQuestions() {
+      const rawText = document.getElementById('bulk-import-text').value.trim();
+      if (!rawText) return;
+
+      const blocks = rawText.split(/\n\s*\n/);
+      let countImported = 0;
+
+      blocks.forEach(block => {
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length > 0) {
+          const qText = lines[0];
+          let direction = "puja";
+          let imgUrl = "";
+          let audioUrl = "";
+
+          const lowerTitle = qText.toLowerCase();
+          if (lowerTitle.includes('baixa') || lowerTitle.includes('baja') || lowerTitle.includes('down')) direction = "baixa";
+          else if (lowerTitle.includes('igual') || lowerTitle.includes('same')) direction = "igual";
+
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].toLowerCase();
+            if (line.startsWith('direccio:') || line.startsWith('direcció:') || line.startsWith('direccion:') || line.startsWith('direction:') || line.startsWith('tipus:') || line.startsWith('resposta:')) {
+              const val = line.split(':')[1].trim();
+              if (val.includes('baixa') || val.includes('baja') || val.includes('down')) direction = "baixa";
+              else if (val.includes('igual') || val.includes('same')) direction = "igual";
+              else if (val.includes('puja') || val.includes('sube') || val.includes('up')) direction = "puja";
+            } else if (line.startsWith('img:')) {
+              imgUrl = lines[i].substring(4).trim();
+            } else if (line.startsWith('audio:')) {
+              audioUrl = lines[i].substring(6).trim();
+            }
+          }
+
+          state.questions.push({
+            q: qText,
+            direction: direction,
+            synthPreset: getPresetForDirection(direction),
+            img: imgUrl,
+            audio: audioUrl
+          });
+          countImported++;
+        }
+      });
+
+      if (countImported > 0) {
+        document.getElementById('bulk-import-text').value = '';
+        renderQuestionsList();
+      }
+    }
+
+    function removeQuestion(idx) {
+      if (state.questions.length <= 1) return;
+      state.questions.splice(idx, 1);
+      resetQuestionForm();
+      renderQuestionsList();
+    }
+
+    function saveConfig() {
+      state.p1aName = document.getElementById('cfg-name-p1a').value.trim() || "Jessie";
+      state.p1aImg = document.getElementById('cfg-img-p1a').value.trim() || defaultState.p1aImg;
+      state.p1bName = document.getElementById('cfg-name-p1b').value.trim() || "Woody";
+      state.p1bImg = document.getElementById('cfg-img-p1b').value.trim() || defaultState.p1bImg;
+      state.bgImg = document.getElementById('cfg-bg-img').value.trim() || defaultState.bgImg;
+      state.timerSeconds = parseInt(document.getElementById('cfg-timer-seconds').value) || 15;
+
+      selectedPlayerName = state.p1aName;
+      selectedPlayerImg = state.p1aImg;
+
+      localStorage.setItem('direccio_so_infantil_cfg', JSON.stringify(state));
+      applyVisuals();
+      closeConfig();
+    }
+
+    window.onload = () => {
+      document.getElementById('config-modal').style.display = 'none';
+      document.getElementById('pin-modal').style.display = 'none';
+      document.getElementById('reset-confirm-modal').style.display = 'none';
+      document.getElementById('quiz-modal').style.display = 'none';
+      document.getElementById('results-screen').style.display = 'none';
+      document.getElementById('char-select-screen').style.display = 'none';
+      document.getElementById('grand-celebration-screen').style.display = 'none';
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('btn-main-config').style.display = 'none';
+      document.getElementById('btn-exit-game').style.display = 'none';
+      document.getElementById('lang-screen').style.display = 'flex';
+      applyTranslations();
+      applyVisuals();
+    };
+  </script>
+
+</body></html>
